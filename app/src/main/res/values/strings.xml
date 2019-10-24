@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">E1 форум</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">@string/app_name</string>
+    <string name="nav_header_subtitle">e1.ru</string>
+    <string name="nav_header_desc">Navigation header</string>
+
+    <string name="Forums">Форумы</string>
+    <string name="Share">Поделиться</string>
+    <string name="Send">Отправить</string>
+    <string name="list_is_empty">Список пуст</string>
+
+    <string name="Ok">Ок</string>
+    <string name="Close">Закрыть</string>
+    <string name="Login">Логин</string>
+    <string name="Password">Пароль</string>
+    <string name="Cancel">Отмена</string>
+    <string name="error_empty_text">Необходимо заполнить</string>
+</resources>
