@@ -95,7 +95,7 @@ public class ForumFragment extends BaseFragment {
         swipeRefreshLayout.setOnRefreshListener(new SwipyRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh(SwipyRefreshLayoutDirection direction) {
-                forumViewModel.loadForums().observe(ForumFragment.this, new Observer<WorkInfo>() {
+                forumViewModel.loadForums().observe(ForumFragment.this.getViewLifecycleOwner(), new Observer<WorkInfo>() {
                     @Override
                     public void onChanged(WorkInfo workInfo) {
                         if (workInfo==null) return;

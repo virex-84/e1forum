@@ -84,7 +84,7 @@ public class PostFragment extends BaseFragment {
         postAdapter = new PostAdapter(Post.DIFF_CALLBACK, new PostAdapter.PostListener() {
             @Override
             public void onUserClick(String userNick, final TextView widget) {
-                forumViewModel.getUser(userNick).observe(PostFragment.this, new Observer<User>() {
+                forumViewModel.getUser(userNick).observe(PostFragment.this.getViewLifecycleOwner(), new Observer<User>() {
                     @Override
                     public void onChanged(User user) {
                         if (user==null) return;
@@ -107,9 +107,9 @@ public class PostFragment extends BaseFragment {
                                 return false;
                             }
                         });
-                        if (user.actionMail!=null) popup.getMenu().add(0,ID_LK,0,"Личное сообщение");
+                        if (user.actionLK!=null) popup.getMenu().add(0,ID_LK,0,"Личное сообщение");
                         if (user.actionMail!=null) popup.getMenu().add(0,ID_MAIL,0,"Отправить письмо на почту");
-                        if (user.actionMail!=null) popup.getMenu().add(0,ID_MODERATOR,0,"Сообщить модератору");
+                        if (user.id>0) popup.getMenu().add(0,ID_MODERATOR,0,"Сообщить модератору");
                         popup.show();
                     }
                 });
@@ -168,7 +168,7 @@ public class PostFragment extends BaseFragment {
                     if (max_pages>current_page_id)
                         current_page_id=current_page_id+1;
                 }
-                forumViewModel.loadPosts(forum_id,topic_id,current_page_id).observe(PostFragment.this, new Observer<WorkInfo>() {
+                forumViewModel.loadPosts(forum_id,topic_id,current_page_id).observe(PostFragment.this.getViewLifecycleOwner(), new Observer<WorkInfo>() {
                     @Override
                     public void onChanged(WorkInfo workInfo) {
                         if (workInfo==null) return;
@@ -187,7 +187,7 @@ public class PostFragment extends BaseFragment {
         });
 
         forumViewModel.getPosts(forum_id,topic_id).removeObservers(this);
-        forumViewModel.getPosts(forum_id,topic_id).observe(this, new Observer<PagedList<Post>>() {
+        forumViewModel.getPosts(forum_id,topic_id).observe(this.getViewLifecycleOwner(), new Observer<PagedList<Post>>() {
             @Override
             public void onChanged(PagedList<Post> posts) {
 
@@ -200,7 +200,7 @@ public class PostFragment extends BaseFragment {
             }
         });
 
-        forumViewModel.getTopicLive(forum_id,topic_id).observe(this, new Observer<Topic>() {
+        forumViewModel.getTopicLive(forum_id,topic_id).observe(this.getViewLifecycleOwner(), new Observer<Topic>() {
             @Override
             public void onChanged(Topic topic) {
                 max_pages=topic.pagesCount;

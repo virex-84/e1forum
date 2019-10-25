@@ -96,7 +96,7 @@ public class TopicFragment extends BaseFragment {
             @Override
             public void onRefresh(SwipyRefreshLayoutDirection direction) {
                 clearPosition(SHARED_OPTIONS);
-                forumViewModel.loadTopics(forum_id).observe(TopicFragment.this, new Observer<WorkInfo>() {
+                forumViewModel.loadTopics(forum_id).observe(TopicFragment.this.getViewLifecycleOwner(), new Observer<WorkInfo>() {
                     @Override
                     public void onChanged(WorkInfo workInfo) {
                         if (workInfo==null) return;
@@ -115,7 +115,7 @@ public class TopicFragment extends BaseFragment {
         });
 
         forumViewModel.getTopics(forum_id).removeObservers(this);
-        forumViewModel.getTopics(forum_id).observe(this, new Observer<PagedList<Topic>>() {
+        forumViewModel.getTopics(forum_id).observe(this.getViewLifecycleOwner(), new Observer<PagedList<Topic>>() {
             @Override
             public void onChanged(PagedList<Topic> topics) {
 
