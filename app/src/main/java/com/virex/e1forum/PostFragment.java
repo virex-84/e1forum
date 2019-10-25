@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.work.WorkInfo;
 
+import com.virex.e1forum.common.LiveDataUtils;
 import com.virex.e1forum.db.entity.Post;
 import com.virex.e1forum.db.entity.Topic;
 import com.virex.e1forum.db.entity.User;
@@ -83,8 +84,10 @@ public class PostFragment extends BaseFragment {
 
         postAdapter = new PostAdapter(Post.DIFF_CALLBACK, new PostAdapter.PostListener() {
             @Override
-            public void onUserClick(String userNick, final TextView widget) {
-                forumViewModel.getUser(userNick).observe(PostFragment.this.getViewLifecycleOwner(), new Observer<User>() {
+            public void onUserClick(final String userNick, final TextView widget) {
+                //observeOnce - подписываемся один раз на событие и сразу отписываемся
+                //т.к. после обновления страницы onChanged сработает заново и мы получим кучу диалоговых окон
+                LiveDataUtils.observeOnce(forumViewModel.getUser(userNick), PostFragment.this.getViewLifecycleOwner(), new Observer<User>() {
                     @Override
                     public void onChanged(User user) {
                         if (user==null) return;
