@@ -17,4 +17,6 @@
     <string name="Password">Пароль</string>
     <string name="Cancel">Отмена</string>
     <string name="error_empty_text">Необходимо заполнить</string>
+    <string name="login_success">Вы успешно залогинены!</string>
+    <string name="login_error">Ошибка</string>
 </resources>

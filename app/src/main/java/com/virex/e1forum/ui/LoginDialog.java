@@ -24,7 +24,7 @@ public class LoginDialog extends DialogFragment {
     private TextView tv_error;
     private ProgressBar progressBar;
 
-    OnDialogClickListener onDialogClickListener;
+    private OnDialogClickListener onDialogClickListener;
 
     public interface OnDialogClickListener {
         void onOkClick(String login, String password);

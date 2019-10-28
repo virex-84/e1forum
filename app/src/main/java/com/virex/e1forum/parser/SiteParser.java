@@ -253,4 +253,9 @@ public class SiteParser {
                 break;
         }
     }
+
+    public static String extractError(String html){
+        Document document = Jsoup.parse(html);
+        return document.getElementsByClass("p-tooltip__error").text();
+    }
 }

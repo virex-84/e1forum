@@ -1,9 +1,7 @@
 package com.virex.e1forum;
 
-import android.annotation.SuppressLint;
 import android.app.Application;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
+import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -14,7 +12,6 @@ import androidx.paging.PositionalDataSource;
 import androidx.work.Data;
 import androidx.work.ExistingWorkPolicy;
 import androidx.work.OneTimeWorkRequest;
-import androidx.work.Operation;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
 
@@ -23,17 +20,16 @@ import com.virex.e1forum.db.entity.Forum;
 import com.virex.e1forum.db.entity.Post;
 import com.virex.e1forum.db.entity.Topic;
 import com.virex.e1forum.db.entity.User;
+import com.virex.e1forum.parser.SiteParser;
 import com.virex.e1forum.repository.ForumsWorker;
 import com.virex.e1forum.repository.PostsWorker;
 import com.virex.e1forum.repository.TopicsWorker;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.Executors;
 
@@ -265,35 +261,40 @@ public class ForumViewModel extends AndroidViewModel {
                 if (response.isSuccessful()) {
                     try {
                         BufferedReader br = new BufferedReader(new InputStreamReader(response.body().byteStream(), "utf-8"));
-                        //text для теста
+                        //вытаскиваем html
                         StringBuilder text=new StringBuilder();
                         String line;
                         while ((line = br.readLine()) != null) {
                             text.append(line);
-                            if (line.contains("p-tooltip__error")){
-                                if (loginListener!=null)
-                                    loginListener.onError(line);
-                            }
                         }
-                        text.append("xxx");
+                        //вытаскиваем сообщение об ошибке
+                        String errorLoginMessage= SiteParser.extractError(text.toString());
+                        if (!TextUtils.isEmpty(errorLoginMessage)) {
+                            if (loginListener != null)
+                                loginListener.onError(errorLoginMessage);
+                            return;
+                        }
+
 
                         if (((App)getApplication()).isLogin()){
                             if (loginListener!=null)
-                                loginListener.onSuccess("");
+                                loginListener.onSuccess(getString(R.string.login_success));
                         } else {
                             if (loginListener!=null)
-                                loginListener.onError("");
+                                loginListener.onError(getString(R.string.login_error));
                         }
 
                     }catch(Exception e){
-
+                        if (loginListener!=null)
+                            loginListener.onError(e.getMessage());
                     }
                 }
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
-
+                if (loginListener!=null)
+                    loginListener.onError(t.getMessage());
             }
         });
 
@@ -315,8 +316,7 @@ public class ForumViewModel extends AndroidViewModel {
 
     }
 
-    public void clearCookies(){
-        SharedPreferences.Editor memes = PreferenceManager.getDefaultSharedPreferences(getApplication().getApplicationContext()).edit();
-        memes.putStringSet("PREF_COOKIES",new HashSet<String>()).apply();
+    private String getString(int resId){
+        return getApplication().getString(resId);
     }
 }

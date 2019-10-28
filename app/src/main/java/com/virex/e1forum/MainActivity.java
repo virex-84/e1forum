@@ -137,6 +137,7 @@ public class MainActivity extends AppCompatActivity
             loginDialog = new LoginDialog(new LoginDialog.OnDialogClickListener() {
                 @Override
                 public void onOkClick(String login, String password) {
+                    loginDialog.setStartLoading();
                     forumViewModel.loginSite(login, password, new ForumViewModel.LoginListener() {
                         @Override
                         public void onSuccess(String message) {
@@ -146,7 +147,9 @@ public class MainActivity extends AppCompatActivity
 
                         @Override
                         public void onError(String message) {
-                            Toast.makeText(MainActivity.this,message,Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(MainActivity.this,message,Toast.LENGTH_SHORT).show();
+                            loginDialog.setError(message);
+                            loginDialog.setFinishLoading();
                         }
                     });
                 }
