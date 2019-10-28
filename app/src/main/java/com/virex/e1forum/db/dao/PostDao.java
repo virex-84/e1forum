@@ -35,4 +35,7 @@ public interface PostDao {
     @Query("SELECT * FROM post WHERE forum_id=:forum_id AND topic_id=:topic_id ORDER BY lastmod asc")
     DataSource.Factory<Integer, Post> dataSourcePagedList(int forum_id, int topic_id);
 
+    @Query("SELECT COUNT(id) FROM post WHERE forum_id=:forum_id AND topic_id=:topic_id")
+    int getCount(int forum_id, int topic_id);
+
 }

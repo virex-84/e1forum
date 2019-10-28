@@ -28,22 +28,29 @@ import java.util.Locale;
  */
 public class SiteParser {
 
+    public enum ParseStatus {
+        START,
+        INPROCESS,
+        END
+    }
+
     public enum SiteType {
         PARCE_MOBILE_SITE,
         PARCE_OLD_SITE
     }
 
     public interface ParserListener {
-        void onParse(Forum forum);
-        void onParse(Topic topic);
-        void onParse(Post post);
-        void onParse(User user);
+        void onParse(Forum forum, ParseStatus parseStatus);
+        void onParse(Topic topic, ParseStatus parseStatus);
+        void onParse(Post post, ParseStatus parseStatus);
+        void onParse(User user, ParseStatus parseStatus);
     }
 
-    public static void parseForums(SiteType siteType, String text, @NonNull ParserListener parserListene){
+    public static void parseForums(SiteType siteType, String text, @NonNull ParserListener parserListener){
 
         switch (siteType){
             case PARCE_OLD_SITE:
+                parserListener.onParse((Forum) null, ParseStatus.START);
                 Document document = Jsoup.parse(text);
                 Elements allA=document.select("a");
                 for(Element element:allA){
@@ -51,21 +58,23 @@ public class SiteParser {
                         Forum forum=new Forum();
                         forum.title=element.text();
                         forum.id =Integer.parseInt(element.attr("href").replace("/talk/forum/list.php?f=",""));
-                        parserListene.onParse(forum);
+                        parserListener.onParse(forum, ParseStatus.INPROCESS);
                     }
                 }
+                parserListener.onParse((Forum) null, ParseStatus.END);
                 break;
         }
 
     }
 
-    public static void parseTopics(SiteType siteType, String text, int forum_id, @NonNull ParserListener parserListene){
+    public static void parseTopics(SiteType siteType, String text, int forum_id, @NonNull ParserListener parserListener){
 
         String today = new SimpleDateFormat("dd-MM-yyyy",Locale.ENGLISH).format(new Date());
         String yesterday = new SimpleDateFormat("dd-MM-yyyy",Locale.ENGLISH).format(new Date(new Date().getTime() - 24*3600*1000));
 
         switch (siteType){
             case PARCE_MOBILE_SITE:
+                parserListener.onParse((Topic) null, ParseStatus.START);
                 Document document = Jsoup.parse(text);
                 Elements allItems=document.getElementsByClass("themes-body-item");
                 for(Element element:allItems){
@@ -132,16 +141,18 @@ public class SiteParser {
                         }
                     }
 
-                    parserListene.onParse(topic);
+                    parserListener.onParse(topic, ParseStatus.INPROCESS);
                 }
+                parserListener.onParse((Topic) null, ParseStatus.END);
                 break;
         }
     }
 
-    public static void parsePosts(SiteType siteType, String text, int forum_id, int topic_id, @NonNull ParserListener parserListene ){
+    public static void parsePosts(SiteType siteType, String text, int forum_id, int topic_id, @NonNull ParserListener parserListener ){
 
         switch (siteType) {
             case PARCE_MOBILE_SITE:
+                parserListener.onParse((Post) null, ParseStatus.START);
                 Document document = Jsoup.parse(text);
                 Elements allItems=document.getElementsByClass("theme-item");
                 for(Element element:allItems) {
@@ -200,7 +211,7 @@ public class SiteParser {
 
                     }
                     //уведомляем о распарсеном пользователе
-                    parserListene.onParse(user);
+                    parserListener.onParse(user, ParseStatus.INPROCESS);
 
                     //post.user=userNick;
                     //if (user.idForum>0)
@@ -237,6 +248,20 @@ public class SiteParser {
                         post.carmaMinus=Integer.valueOf(votes.get(1).text());
                     }
 
+                    //если нет тегов - то плюсомёт отключен
+                    if (element.select(".vote-up.btn-active").isEmpty())
+                        post.disableCarma=true;
+                    else {
+                        //иначе - кнопки есть значит плюсомет включен
+                        post.disableCarma=false;
+
+                        //но если стоит стиль display:none - то всё же плюсомет отключен
+                        Elements ell=element.select(".vote-up.btn-active");
+                        if (ell.attr("style").replace(" ","").contains("display:none")) //<-- точное соответствие [display: none;] попробовал без пробела
+                            post.disableCarma=true;
+
+                    }
+
                     try {
                         //HH - от 0 до 24
                         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm", Locale.ENGLISH);
@@ -248,8 +273,9 @@ public class SiteParser {
                     }
 
                     //уведомляем о распарсенном посте
-                    parserListene.onParse(post);
+                    parserListener.onParse(post, ParseStatus.INPROCESS);
                 }
+                parserListener.onParse((Post) null, ParseStatus.END);
                 break;
         }
     }

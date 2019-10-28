@@ -19,4 +19,8 @@
     <string name="error_empty_text">Необходимо заполнить</string>
     <string name="login_success">Вы успешно залогинены!</string>
     <string name="login_error">Ошибка</string>
+    <string name="vote_error">Ошибка</string>
+    <string name="send_private">Личное сообщение</string>
+    <string name="send_to_mail">Отправить письмо на почту</string>
+    <string name="send_to_moderator">Сообщить модератору</string>
 </resources>

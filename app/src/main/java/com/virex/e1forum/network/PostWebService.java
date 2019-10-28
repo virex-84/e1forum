@@ -27,4 +27,11 @@ public interface PostWebService {
                                 @Field("password") String password);
 
 
+    @FormUrlEncoded
+    @Headers("X-Requested-With:XMLHttpRequest")
+    @POST("https://m.e1.ru/f/vote.php")
+    Call<VoteResponse> vote(@Field("f") String forum_id,
+                             @Field("t") String topic_id,
+                             @Field("m") String post_id,
+                             @Field("v") String action);
 }

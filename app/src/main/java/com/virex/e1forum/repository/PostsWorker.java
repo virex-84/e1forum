@@ -40,8 +40,8 @@ public class PostsWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        int forum_id=getInputData().getInt(EXTRA_FORUM_ID,-1);
-        int topic_id=getInputData().getInt(EXTRA_TOPIC_ID,-1);
+        final int forum_id=getInputData().getInt(EXTRA_FORUM_ID,-1);
+        final int topic_id=getInputData().getInt(EXTRA_TOPIC_ID,-1);
         int page_id=getInputData().getInt(EXTRA_PAGE_ID,-1);
         try {
             Response<ResponseBody> result= App.getPostApi().getPosts(forum_id,topic_id,page_id).execute();
@@ -49,22 +49,33 @@ public class PostsWorker extends Worker {
                 String text=result.body().string();
                 SiteParser.parsePosts(SiteParser.SiteType.PARCE_MOBILE_SITE, text, forum_id, topic_id, new SiteParser.ParserListener() {
                     @Override
-                    public void onParse(Forum forum) {
+                    public void onParse(Forum forum, SiteParser.ParseStatus parseStatus) {
 
                     }
 
                     @Override
-                    public void onParse(Topic topic) {
+                    public void onParse(Topic topic, SiteParser.ParseStatus parseStatus) {
 
                     }
 
                     @Override
-                    public void onParse(Post post) {
-                        database.postDao().insert(post);
+                    public void onParse(Post post, SiteParser.ParseStatus parseStatus) {
+                        if (parseStatus== SiteParser.ParseStatus.INPROCESS && post!=null)
+                            database.postDao().insert(post);
+
+                        //по окончании парсинга постов - нам нужно обновить количество постов в топике
+                        if (parseStatus== SiteParser.ParseStatus.END){
+                            int count=database.postDao().getCount(forum_id, topic_id);
+                            Topic oldTopic=database.topicDao().getTopic(forum_id, topic_id);
+                            oldTopic.pagesCount=count / 25; //количество страниц кратное 25
+                            database.topicDao().update(oldTopic);
+                        }
                     }
 
                     @Override
-                    public void onParse(User user) {
+                    public void onParse(User user, SiteParser.ParseStatus parseStatus) {
+                        if (parseStatus!=SiteParser.ParseStatus.INPROCESS && user==null) return;
+
                         User oldUser=database.userDao().getUser(user.nick);
                         if (oldUser!=null){
                             //обязательно сохраняем поля которые могут перезатереться если войти не залогиненным

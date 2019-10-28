@@ -138,7 +138,7 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public void onOkClick(String login, String password) {
                     loginDialog.setStartLoading();
-                    forumViewModel.loginSite(login, password, new ForumViewModel.LoginListener() {
+                    forumViewModel.loginSite(login, password, new ForumViewModel.NetworkListener() {
                         @Override
                         public void onSuccess(String message) {
                             Toast.makeText(MainActivity.this,message,Toast.LENGTH_SHORT).show();

@@ -26,6 +26,7 @@ import com.virex.e1forum.common.LiveDataUtils;
 import com.virex.e1forum.db.entity.Post;
 import com.virex.e1forum.db.entity.Topic;
 import com.virex.e1forum.db.entity.User;
+import com.virex.e1forum.network.VoteType;
 import com.virex.e1forum.ui.GlideImageGetter;
 import com.virex.e1forum.ui.PostAdapter;
 import com.virex.e1forum.ui.SwipyRefreshLayout.SwipyRefreshLayout;
@@ -110,9 +111,9 @@ public class PostFragment extends BaseFragment {
                                 return false;
                             }
                         });
-                        if (user.actionLK!=null) popup.getMenu().add(0,ID_LK,0,"Личное сообщение");
-                        if (user.actionMail!=null) popup.getMenu().add(0,ID_MAIL,0,"Отправить письмо на почту");
-                        if (user.id>0) popup.getMenu().add(0,ID_MODERATOR,0,"Сообщить модератору");
+                        if (user.actionLK!=null) popup.getMenu().add(0,ID_LK,0,getString(R.string.send_private));
+                        if (user.actionMail!=null) popup.getMenu().add(0,ID_MAIL,0,getString(R.string.send_to_mail));
+                        if (user.id>0) popup.getMenu().add(0,ID_MODERATOR,0,getString(R.string.send_to_moderator));
                         popup.show();
                     }
                 });
@@ -142,6 +143,22 @@ public class PostFragment extends BaseFragment {
                     zoomImageDialog.show(mainactivity.getSupportFragmentManager(), "zoom_image");
                 }
             }
+
+            @Override
+            public void onVoteClick(final Post post, VoteType voteType) {
+                forumViewModel.votePost(post, voteType, new ForumViewModel.NetworkListener() {
+                    @Override
+                    public void onSuccess(String message) {
+                        postAdapter.notifyItemChanged(postAdapter.getCurrentList().indexOf(post));
+                    }
+
+                    @Override
+                    public void onError(String message) {
+
+                    }
+                });
+            }
+
         },getResources().getColor(R.color.colorAccent), getResources());
 
         RecyclerView recyclerView = view.findViewById(R.id.recyclerView);
@@ -168,6 +185,9 @@ public class PostFragment extends BaseFragment {
                     current_page_id=0;
                 //если обновляют снизу - увеличиваем счетчик
                 } else if (direction==SwipyRefreshLayoutDirection.BOTTOM) {
+                    if (max_pages>current_page_id)
+                        current_page_id=current_page_id+1;
+
                     if (max_pages>current_page_id)
                         current_page_id=current_page_id+1;
                 }

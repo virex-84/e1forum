@@ -29,6 +29,8 @@ public class Post {
     public int carmaPlus;
     public int carmaMinus;
 
+    public boolean disableCarma=false; //доступность "плюсомёта"
+
     public long lastmod;  //последняя модификация timestamp
 
     //сравнение для адаптера PagedList (recucleview)
@@ -41,7 +43,7 @@ public class Post {
 
         @Override
         public boolean areContentsTheSame(@NonNull Post oldItem, @NonNull Post newItem) {
-            return  (oldItem.text.contains(newItem.text) && (oldItem.carmaPlus==newItem.carmaPlus) && (oldItem.carmaMinus==newItem.carmaMinus) && (oldItem.lastmod==newItem.lastmod));
+            return  (oldItem.text.contains(newItem.text) && (oldItem.carmaPlus==newItem.carmaPlus) && (oldItem.carmaMinus==newItem.carmaMinus) && (oldItem.lastmod==newItem.lastmod) && (oldItem.disableCarma==newItem.disableCarma));
         }
     };
 }

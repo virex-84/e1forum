@@ -54,7 +54,9 @@ public class ForumsWorker extends Worker {
                         //полный список форумов есть только на старой версии сайта
                         SiteParser.parseForums(SiteParser.SiteType.PARCE_OLD_SITE, text, new SiteParser.ParserListener() {
                             @Override
-                            public void onParse(Forum forum) {
+                            public void onParse(Forum forum, SiteParser.ParseStatus parseStatus) {
+                                if (parseStatus!=SiteParser.ParseStatus.INPROCESS && forum==null) return;
+
                                 Forum oldForum=database.forumDao().getForum(forum.id);
                                 if (oldForum!=null){
                                     //обязательно сохраняем флаг установленный пользователем иначе перетрется
@@ -64,17 +66,17 @@ public class ForumsWorker extends Worker {
                             }
 
                             @Override
-                            public void onParse(Topic topic) {
+                            public void onParse(Topic topic, SiteParser.ParseStatus parseStatus) {
 
                             }
 
                             @Override
-                            public void onParse(Post post) {
+                            public void onParse(Post post, SiteParser.ParseStatus parseStatus) {
 
                             }
 
                             @Override
-                            public void onParse(User user) {
+                            public void onParse(User user, SiteParser.ParseStatus parseStatus) {
 
                             }
                         });

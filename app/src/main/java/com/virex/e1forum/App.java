@@ -11,6 +11,7 @@ import com.virex.e1forum.network.UserAgentInterceptor;
 import okhttp3.Cookie;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class App extends Application {
 
@@ -54,7 +55,7 @@ public class App extends Application {
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://www.e1.ru/talk/") //Базовая часть адреса
-                //.addConverterFactory(GsonConverterFactory.create()) //Конвертер, необходимый для преобразования JSON'а в объекты при POST запросах
+                .addConverterFactory(GsonConverterFactory.create()) //Конвертер, необходимый для преобразования JSON'а в объекты при POST запросах
                 .client(client)
                 .build();
 

@@ -20,6 +20,8 @@ import com.virex.e1forum.db.entity.Forum;
 import com.virex.e1forum.db.entity.Post;
 import com.virex.e1forum.db.entity.Topic;
 import com.virex.e1forum.db.entity.User;
+import com.virex.e1forum.network.VoteResponse;
+import com.virex.e1forum.network.VoteType;
 import com.virex.e1forum.parser.SiteParser;
 import com.virex.e1forum.repository.ForumsWorker;
 import com.virex.e1forum.repository.PostsWorker;
@@ -40,7 +42,7 @@ import retrofit2.Response;
 
 public class ForumViewModel extends AndroidViewModel {
 
-    public interface LoginListener {
+    public interface NetworkListener {
         void onSuccess(String message);
         void onError(String message);
     }
@@ -250,7 +252,7 @@ public class ForumViewModel extends AndroidViewModel {
         return source;
     }
 
-    public void loginSite(String login, String password, final LoginListener loginListener){
+    public void loginSite(String login, String password, final NetworkListener loginListener){
         //очищаем куки
         ((App)getApplication()).clearCookies();
 
@@ -314,6 +316,44 @@ public class ForumViewModel extends AndroidViewModel {
 
          */
 
+    }
+
+
+
+    public void votePost(final Post post, VoteType voteType, final NetworkListener voteListener){
+        App.getPostApi().vote(String.valueOf(post.forum_id),String.valueOf(post.topic_id),String.valueOf(post.id),voteType.name()).enqueue(new Callback<VoteResponse>() {
+            @Override
+            public void onResponse(Call<VoteResponse> call, Response<VoteResponse> response) {
+                if (response.isSuccessful()){
+                    final VoteResponse voteResponse=response.body();
+                    if (voteResponse!=null){
+                        Executors.newSingleThreadExecutor().submit(new Runnable() {
+                            @Override
+                            public void run() {
+                                post.carmaPlus=Integer.parseInt(voteResponse.u);
+                                post.carmaMinus=Integer.parseInt(voteResponse.d);
+                                post.disableCarma=true;
+                                database.postDao().update(post);
+                            }
+                        });
+                        if (voteListener!=null)
+                            voteListener.onSuccess("");
+                    } else {
+                        if (voteListener!=null)
+                            voteListener.onError(getString(R.string.vote_error));
+                    }
+                } else {
+                    if (voteListener!=null)
+                        voteListener.onError(getString(R.string.vote_error));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<VoteResponse> call, Throwable t) {
+                if (voteListener!=null)
+                    voteListener.onError(t.getMessage());
+            }
+        });
     }
 
     private String getString(int resId){

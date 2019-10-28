@@ -30,6 +30,7 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.virex.e1forum.R;
 import com.virex.e1forum.common.GlideApp;
 import com.virex.e1forum.db.entity.Post;
+import com.virex.e1forum.network.VoteType;
 
 import org.xml.sax.XMLReader;
 
@@ -54,6 +55,8 @@ public class PostAdapter extends PagedListAdapter<Post, RecyclerView.ViewHolder>
         void onLinkClick(String link);
         void onUserClick(String userNick, TextView widget);
         void onImageClick(Drawable drawable);
+        //void onVoteClick(int forum_id, int topic_id,  int post_id, VoteType voteType);
+        void onVoteClick(Post post, VoteType voteType);
     }
 
     public PostAdapter(@NonNull DiffUtil.ItemCallback<Post> diffCallback, PostListener postListener, int spanColor, Resources resources) {
@@ -210,6 +213,32 @@ public class PostAdapter extends PagedListAdapter<Post, RecyclerView.ViewHolder>
                 //реагируем на нажатие ссылок и т.д.
                 postHolder.tv_text.setMovementMethod(this.linkMovementMethod);
                 postHolder.tv_user.setMovementMethod(this.linkMovementMethod);
+
+                if (post.disableCarma){
+                    postHolder.btn_plus.setEnabled(false);
+                    postHolder.btn_minus.setEnabled(false);
+                } else {
+                    postHolder.btn_plus.setEnabled(true);
+                    postHolder.btn_minus.setEnabled(true);
+
+                    postHolder.btn_plus.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            if (PostAdapter.this.postListener != null)
+                                //PostAdapter.this.postListener.onVoteClick(post.forum_id,post.topic_id, post.id, VoteType.up);
+                                PostAdapter.this.postListener.onVoteClick(post, VoteType.up);
+                        }
+                    });
+
+                    postHolder.btn_minus.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            if (PostAdapter.this.postListener != null)
+                                //PostAdapter.this.postListener.onVoteClick(post.forum_id,post.topic_id, post.id, VoteType.down);
+                                PostAdapter.this.postListener.onVoteClick(post, VoteType.down);
+                        }
+                    });
+                }
 
                 break;
             default:

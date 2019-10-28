@@ -55,12 +55,14 @@ public class TopicsWorker extends Worker {
                         String text=result.body().string();
                         SiteParser.parseTopics(SiteParser.SiteType.PARCE_MOBILE_SITE, text, forum_id, new SiteParser.ParserListener() {
                             @Override
-                            public void onParse(Forum forum) {
+                            public void onParse(Forum forum, SiteParser.ParseStatus parseStatus) {
 
                             }
 
                             @Override
-                            public void onParse(Topic topic) {
+                            public void onParse(Topic topic, SiteParser.ParseStatus parseStatus) {
+                                if (parseStatus!=SiteParser.ParseStatus.INPROCESS && topic==null) return;
+
                                 Topic oldTopic=database.topicDao().getTopic(topic.forum_id,topic.id);
                                 if (oldTopic!=null){
                                     //обязательно сохраняем флаг установленный пользователем иначе перетрется
@@ -71,12 +73,12 @@ public class TopicsWorker extends Worker {
                             }
 
                             @Override
-                            public void onParse(Post post) {
+                            public void onParse(Post post, SiteParser.ParseStatus parseStatus) {
 
                             }
 
                             @Override
-                            public void onParse(User user) {
+                            public void onParse(User user, SiteParser.ParseStatus parseStatus) {
 
                             }
                         });
