@@ -208,6 +208,11 @@ public class PostAdapter extends PagedListAdapter<Post, RecyclerView.ViewHolder>
                 if (isReadOnly){
                     postHolder.btn_reply.setEnabled(false);
                     postHolder.btn_quote.setEnabled(false);
+                } else {
+                    postHolder.btn_reply.setEnabled(true);
+                    postHolder.btn_quote.setEnabled(true);
+                    postHolder.btn_plus.setEnabled(true);
+                    postHolder.btn_minus.setEnabled(true);
                 }
 
                 //реагируем на нажатие ссылок и т.д.

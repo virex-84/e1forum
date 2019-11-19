@@ -1,12 +1,16 @@
 package com.virex.e1forum;
 
 import android.app.Application;
+import android.text.TextUtils;
+import android.util.Log;
 
 import com.virex.e1forum.common.PrefCookieJar;
 import com.virex.e1forum.network.ForumWebService;
 import com.virex.e1forum.network.PostWebService;
 import com.virex.e1forum.network.TopicWebService;
 import com.virex.e1forum.network.UserAgentInterceptor;
+
+import java.util.List;
 
 import okhttp3.Cookie;
 import okhttp3.OkHttpClient;
@@ -37,8 +41,14 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
         //устанавливаем контроль за куками
-        prefCookieJar=new PrefCookieJar(getSharedPreferences("APPP",MODE_PRIVATE));
-        //prefCookieJar.setAnonimusMode(true);
+        prefCookieJar=new PrefCookieJar(getSharedPreferences("APPP", MODE_PRIVATE), new PrefCookieJar.ChangeListener() {
+            @Override
+            public void onChange(List<Cookie> cookies) {
+                Log.i("COOKIES  change","==START==\n");
+                Log.i("","\n"+TextUtils.join("\n", cookies));
+                Log.i("COOKIES  change","==END==\n");
+            }
+        });
 
         OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
 
@@ -47,8 +57,8 @@ public class App extends Application {
         //httpClient.addInterceptor(new ReceivedCookiesInterceptor(getApplicationContext()));//сохранение куков с сайта - заменено PrefCookieJar
 
         OkHttpClient client = httpClient
-                //.followRedirects(false)
-                //.followSslRedirects(false)
+                .followRedirects(true)
+                .followSslRedirects(true)
                 //куки
                 .cookieJar(prefCookieJar)
                 .build();
@@ -72,9 +82,24 @@ public class App extends Application {
 
     //узнаем залогинены мы или нет
     public boolean isLogin(){
-        for (Cookie cookie : prefCookieJar.getCookies()){
+        try {
+            for (Cookie cookie : prefCookieJar.getCookies()) {
+                //гарантия того что мы залогинены - этот хитрый кук
+                if (cookie.name().equals("e1_ttq") && !TextUtils.isEmpty(cookie.value())) return true;
+            }
+        } catch(NullPointerException e){
+
+        }
+        return false;
+    }
+
+
+    public boolean initIsLogin(){
+        for (String cookie : prefCookieJar.loadCookies()){
             //гарантия того что мы залогинены - этот хитрый кук
-            if (cookie.name().equals("e1_ttq")) return true;
+            if (cookie.contains("e1_ttq") && cookie.contains("key")){
+                    return true;
+            }
         }
         return false;
     }

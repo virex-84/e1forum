@@ -14,11 +14,13 @@
     <string name="Ok">Ок</string>
     <string name="Close">Закрыть</string>
     <string name="Login">Логин</string>
+    <string name="Logout">Выход</string>
     <string name="Password">Пароль</string>
     <string name="Cancel">Отмена</string>
     <string name="error_empty_text">Необходимо заполнить</string>
     <string name="login_success">Вы успешно залогинены!</string>
     <string name="login_error">Ошибка</string>
+    <string name="logout_warning">Вы действительно хотите разлогиниться?</string>
     <string name="vote_error">Ошибка</string>
     <string name="send_private">Личное сообщение</string>
     <string name="send_to_mail">Отправить письмо на почту</string>

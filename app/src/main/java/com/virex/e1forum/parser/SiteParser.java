@@ -250,7 +250,8 @@ public class SiteParser {
 
                     //если нет тегов - то плюсомёт отключен
                     if (element.select(".vote-up.btn-active").isEmpty())
-                        post.disableCarma=true;
+                        //post.disableCarma=true;
+                        post.disableCarma=false; //--мы не залогинены поэтому плюсомет игнорируем
                     else {
                         //иначе - кнопки есть значит плюсомет включен
                         post.disableCarma=false;

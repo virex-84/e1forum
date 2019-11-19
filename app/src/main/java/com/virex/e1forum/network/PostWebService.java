@@ -21,8 +21,18 @@ public interface PostWebService {
 
 
     @FormUrlEncoded
-    @POST("https://passport.e1.ru/login/?token_name=ngs_token&return=https%3A%2F%2Fm.e1.ru%2Ff%2F67%2F17884060%2F")
-    Call<ResponseBody> login(@Field("go") String go,
+    //@POST("https://passport.e1.ru/login/?token_name=ngs_token&return=https%3A%2F%2Fm.e1.ru%2Ff%2F67%2F17884060%2F")
+    //@POST("https://passport.e1.ru/login/?token_name=ngs_token&return=https%3A%2F%2Fm.e1.ru%2Ff%2F")
+    //@POST("https://passport.e1.ru/signin/?return=https%3A%2F%2Fm.e1.ru%2Ff%2F&token_name=ngs_token")
+    //@POST("https://passport.e1.ru/signin/?return=https%3A%2F%2Fm.e1.ru%2Ff%2F&token_name=ngs_token&cookie_disabled=0")
+    @POST("https://passport.e1.ru/login/?token_name=ngs_token&return=https%3A%2F%2Fm.e1.ru%2Ff%2F")
+    @Headers({"referer: https://m.e1.ru/f/?login=y",
+            "sec-fetch-mode: navigate",
+            "sec-fetch-site: same-site",
+            "sec-fetch-user: ?1",
+            "upgrade-insecure-requests: 1"})
+    Call<ResponseBody> login(
+                             @Field("sub") String sub,
                                 @Field("login") String login,
                                 @Field("password") String password);
 

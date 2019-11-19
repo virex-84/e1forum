@@ -6,6 +6,7 @@ import android.text.TextUtils;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.paging.LivePagedListBuilder;
 import androidx.paging.PagedList;
 import androidx.paging.PositionalDataSource;
@@ -42,6 +43,8 @@ import retrofit2.Response;
 
 public class ForumViewModel extends AndroidViewModel {
 
+    private MutableLiveData<Boolean> privIsLogin = new MutableLiveData<>(false);
+
     public interface NetworkListener {
         void onSuccess(String message);
         void onError(String message);
@@ -55,6 +58,13 @@ public class ForumViewModel extends AndroidViewModel {
         this.application=application;
 
         database=AppDataBase.getAppDatabase(application);
+
+        //заполняем LiveData при запуске (наличие определенного cookie)
+        privIsLogin.postValue(((App)getApplication()).initIsLogin());
+    }
+
+    public LiveData<Boolean> isLogin() {
+        return privIsLogin;
     }
 
     public LiveData<List<Forum>> getForums(){
@@ -253,13 +263,10 @@ public class ForumViewModel extends AndroidViewModel {
     }
 
     public void loginSite(String login, String password, final NetworkListener loginListener){
-        //очищаем куки
-        ((App)getApplication()).clearCookies();
-
         //пробуем залогиниться
-        App.getPostApi().login("",login,password).enqueue(new Callback<ResponseBody>() {
+        App.getPostApi().login("login",login,password).enqueue(new Callback<ResponseBody>() {
             @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
                     try {
                         BufferedReader br = new BufferedReader(new InputStreamReader(response.body().byteStream(), "utf-8"));
@@ -274,6 +281,19 @@ public class ForumViewModel extends AndroidViewModel {
                         if (!TextUtils.isEmpty(errorLoginMessage)) {
                             if (loginListener != null)
                                 loginListener.onError(errorLoginMessage);
+
+                            privIsLogin.setValue(((App)getApplication()).isLogin());
+                            /*
+                            Executors.newSingleThreadExecutor().submit(new Runnable() {
+                                @Override
+                                public void run() {
+                                    privIsLogin.postValue(((App)getApplication()).isLogin());
+                                }
+                            });
+                             */
+
+
+                            //privIsLogin.postValue(true);
                             return;
                         }
 
@@ -291,31 +311,42 @@ public class ForumViewModel extends AndroidViewModel {
                             loginListener.onError(e.getMessage());
                     }
                 }
+
+                //отправляем значение
+                privIsLogin.setValue(((App)getApplication()).isLogin());
+                /*
+                Executors.newSingleThreadExecutor().submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        privIsLogin.postValue(((App)getApplication()).isLogin());
+                    }
+                });
+                 */
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 if (loginListener!=null)
                     loginListener.onError(t.getMessage());
+
+                //отправляем значение
+                privIsLogin.setValue(((App)getApplication()).isLogin());
+                /*
+                Executors.newSingleThreadExecutor().submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        privIsLogin.postValue(((App)getApplication()).isLogin());
+                    }
+                });
+                 */
             }
         });
 
+    }
 
-        /*
-        try {
-            Response<ResponseBody> result=App.getPostApi().login("",URLEncodeString(login),URLEncodeString(password)).execute();
-            if (result.isSuccessful()) {
-                BufferedReader br = new BufferedReader(new InputStreamReader(result.body().byteStream(), "utf-8"));
-                String line;
-                while ((line = br.readLine()) != null) {
-                }
-            }
-            } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-         */
-
+    public void logOut(){
+        ((App)getApplication()).clearCookies();
+        privIsLogin.setValue(((App)getApplication()).isLogin());
     }
 
 

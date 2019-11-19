@@ -1,9 +1,11 @@
 package com.virex.e1forum;
 
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.view.GravityCompat;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 
@@ -22,6 +24,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.Observer;
 
 
 public class MainActivity extends AppCompatActivity
@@ -49,23 +52,19 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
+            @Override
+            public void onDrawerOpened(View drawerView) {
+            }
+        };
         if (!isDrawerFixed) {
-            ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
-                @Override
-                public void onDrawerOpened(View drawerView) {
-                }
-            };
             badgeDrawerArrowDrawable = new BadgeDrawerArrowDrawable(getSupportActionBar().getThemedContext());
             toggle.setDrawerArrowDrawable(badgeDrawerArrowDrawable);
-            drawer.addDrawerListener(toggle);
-            toggle.syncState();
         }
-
-        navigationView = findViewById(R.id.nav_view);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
+
+        navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         //восстанавливаем ранее открытый фрагмент
@@ -78,12 +77,47 @@ public class MainActivity extends AppCompatActivity
         }
 
         options= PreferenceManager.getDefaultSharedPreferences(this);
+
+        forumViewModel.isLogin().observe(this, new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean isLogin) {
+                if (isLogin) {
+                    getSupportActionBar().setDisplayShowHomeEnabled(true);
+                    getSupportActionBar().setIcon(R.drawable.online);
+
+                    onMenuEnabled(R.id.nav_login,false);
+                    onMenuEnabled(R.id.nav_logout,true);
+                } else {
+                    getSupportActionBar().setDisplayShowHomeEnabled(true);
+                    getSupportActionBar().setIcon(R.drawable.offline);
+
+                    onMenuEnabled(R.id.nav_login,true);
+                    onMenuEnabled(R.id.nav_logout,false);
+                }
+
+
+                Fragment currentFragment=getSupportFragmentManager().findFragmentById(R.id.content);
+                if (currentFragment==null) return;
+
+                if (currentFragment instanceof PostFragment){
+                    ((PostFragment) currentFragment).setIsReadOnly(!isLogin);
+                }
+            }
+        });
     }
 
     public void onMenuClick(int id){
         try {
             MenuItem menuItem = navigationView.getMenu().findItem(id);
             onNavigationItemSelected(menuItem);
+        } catch (Exception ignore){
+        }
+    }
+
+    public void onMenuEnabled(int id, boolean value){
+        try {
+            MenuItem menuItem = navigationView.getMenu().findItem(id);
+            menuItem.setEnabled(value);
         } catch (Exception ignore){
         }
     }
@@ -155,6 +189,21 @@ public class MainActivity extends AppCompatActivity
                 }
             });
             loginDialog.show(getSupportFragmentManager(),"login");
+
+        } else if (id == R.id.nav_logout) {
+
+            AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+            alertDialog
+                    .setCancelable(true)
+                    .setMessage(getString(R.string.logout_warning))
+                    .setPositiveButton(R.string.Cancel, null)
+                    .setNegativeButton(R.string.Ok, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    forumViewModel.logOut();
+                }
+            });
+            alertDialog.show();
 
         } else if (id == R.id.nav_share) {
 

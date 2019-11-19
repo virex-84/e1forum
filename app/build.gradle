@@ -41,8 +41,8 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.5'
 
     //ViewModel LiveData
-    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0-rc01'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel:2.2.0-rc01'
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0-rc02'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel:2.2.0-rc02'
 
     //WorkManager
     implementation "androidx.work:work-runtime:2.2.0"

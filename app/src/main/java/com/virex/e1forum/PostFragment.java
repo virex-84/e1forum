@@ -60,6 +60,8 @@ public class PostFragment extends BaseFragment {
     private final int ID_MAIL=2;
     private final int ID_MODERATOR=3;
 
+    private boolean currentTopicIsClosed=false;
+
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -146,6 +148,8 @@ public class PostFragment extends BaseFragment {
 
             @Override
             public void onVoteClick(final Post post, VoteType voteType) {
+                //сохраняем позицию перед плюсометом
+                savePosition(linearLayoutManager,SHARED_OPTIONS);
                 forumViewModel.votePost(post, voteType, new ForumViewModel.NetworkListener() {
                     @Override
                     public void onSuccess(String message) {
@@ -227,10 +231,23 @@ public class PostFragment extends BaseFragment {
             @Override
             public void onChanged(Topic topic) {
                 max_pages=topic.pagesCount;
-                if (topic.isClosed)
+                if (topic.isClosed) {
+                    currentTopicIsClosed=true;
                     postAdapter.setIsReadOnly(true);
+                }
             }
         });
+
+
+        forumViewModel.isLogin().observe(this.getViewLifecycleOwner(),  new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean isLogin) {
+                //если топик не закрыт, но мы не залогинены - делаем его только для чтения
+                if (!currentTopicIsClosed)
+                    postAdapter.setIsReadOnly(!isLogin);
+            }
+        });
+
 
         return view;
     }
@@ -241,5 +258,9 @@ public class PostFragment extends BaseFragment {
         savePosition(linearLayoutManager,SHARED_OPTIONS);
     }
 
-
+    public void setIsReadOnly(Boolean value){
+        //если топик не закрыт, но мы не залогинены - делаем его только для чтения
+        if (!currentTopicIsClosed)
+            postAdapter.setIsReadOnly(value);
+    }
 }
