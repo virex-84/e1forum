@@ -12,6 +12,6 @@ import retrofit2.http.Url;
 public interface TopicWebService {
     //https://m.e1.ru/f/152/
 
-    @GET("https://m.e1.ru/f/{id}/")
-    Call<ResponseBody> getTopics(@Path("id") int forum_id);
+    @GET("https://m.e1.ru/f/{id}/p/{tid}")
+    Call<ResponseBody> getTopics(@Path("id") int forum_id, @Path("tid") int topic_id);
 }

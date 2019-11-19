@@ -46,4 +46,8 @@ public interface TopicDao {
     //Room это SQLite, и boolean хранится в виде integer поэтому нельзя применить "isBookMark = not isBookMark"
     @Query("UPDATE topic SET isBookMark = CASE WHEN isBookMark=0 THEN 1 ELSE 0 END WHERE id == :topic_id and forum_id==:forum_id")
     int changeBookMark(int forum_id, int topic_id);
+
+    //Room это SQLite, и boolean хранится в виде integer поэтому нельзя применить "isBookMark = not isBookMark"
+    @Query("select count(*) from topic where forum_id==:forum_id")
+    LiveData<Integer> getCount(int forum_id);
 }

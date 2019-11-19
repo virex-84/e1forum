@@ -99,7 +99,7 @@ public class ForumViewModel extends AndroidViewModel {
                     public void onZeroItemsLoaded() {
                         super.onZeroItemsLoaded();
                         //база пустая
-                        loadTopics(forum_id);
+                        loadTopics(forum_id,0);
                     }
                 })
                 .build();
@@ -108,10 +108,15 @@ public class ForumViewModel extends AndroidViewModel {
 
     }
 
-    public LiveData<WorkInfo> loadTopics(int forum_id){
+    public LiveData<Integer> getTopicsCount(int forum_id){
+        return  database.topicDao().getCount(forum_id);
+    }
+
+    public LiveData<WorkInfo> loadTopics(int forum_id, int topic_id){
         Data data = new Data.Builder()
                 .putInt(TopicsWorker.EXTRA_ACTION, TopicsWorker.ACTION_LOAD_FROM_NETWORK)
                 .putInt(TopicsWorker.EXTRA_FORUM_ID, forum_id)
+                .putInt(TopicsWorker.EXTRA_TOPIC_ID, topic_id)
                 .build();
         OneTimeWorkRequest simpleRequest = new OneTimeWorkRequest.Builder(TopicsWorker.class).setInputData(data).build();
         WorkManager.getInstance(application).enqueueUniqueWork("loadTopics", ExistingWorkPolicy.REPLACE,simpleRequest);

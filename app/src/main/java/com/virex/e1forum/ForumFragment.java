@@ -113,7 +113,6 @@ public class ForumFragment extends BaseFragment {
             }
         });
 
-        forumViewModel.getForums().removeObservers(this);
         forumViewModel.getForums().observe(this.getViewLifecycleOwner(), new Observer<List<Forum>>() {
             @Override
             public void onChanged(List<Forum> forums) {

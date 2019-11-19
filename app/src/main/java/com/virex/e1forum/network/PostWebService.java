@@ -16,8 +16,8 @@ public interface PostWebService {
     //https://m.e1.ru/f/152/
     //https://m.e1.ru/f/234/212/
 
-    @GET("https://m.e1.ru/f/{fid}/{tid}/p/{pid}/")
-    Call<ResponseBody> getPosts(@Path("fid") int forum_id, @Path("tid") int topic_id, @Path("pid") int page_id);
+    @GET("https://m.e1.ru/f/{fid}/{tid}/p/{last_pid}/")
+    Call<ResponseBody> getPosts(@Path("fid") int forum_id, @Path("tid") int topic_id, @Path("last_pid") int last_pid);
 
 
     @FormUrlEncoded

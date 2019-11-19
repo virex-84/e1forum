@@ -32,6 +32,9 @@ public class TopicFragment extends BaseFragment {
 
     private int forum_id=0;
 
+    private int max_pages_of_topics=0;
+    private int current_topic_id=0;
+
     private SwipyRefreshLayout swipeRefreshLayout;
     private TopicAdapter topicAdapter;
     private ForumViewModel forumViewModel;
@@ -96,7 +99,14 @@ public class TopicFragment extends BaseFragment {
             @Override
             public void onRefresh(SwipyRefreshLayoutDirection direction) {
                 clearPosition(SHARED_OPTIONS);
-                forumViewModel.loadTopics(forum_id).observe(TopicFragment.this.getViewLifecycleOwner(), new Observer<WorkInfo>() {
+                //если обновляют сверху - обновляем только первую страницу
+                if (direction==SwipyRefreshLayoutDirection.TOP){
+                    current_topic_id=0;
+                    //если обновляют снизу - увеличиваем счетчик
+                } else if (direction==SwipyRefreshLayoutDirection.BOTTOM) {
+                    current_topic_id=max_pages_of_topics+1;
+                }
+                forumViewModel.loadTopics(forum_id,current_topic_id).observe(TopicFragment.this.getViewLifecycleOwner(), new Observer<WorkInfo>() {
                     @Override
                     public void onChanged(WorkInfo workInfo) {
                         if (workInfo==null) return;
@@ -114,17 +124,22 @@ public class TopicFragment extends BaseFragment {
             }
         });
 
-        forumViewModel.getTopics(forum_id).removeObservers(this);
         forumViewModel.getTopics(forum_id).observe(this.getViewLifecycleOwner(), new Observer<PagedList<Topic>>() {
             @Override
             public void onChanged(PagedList<Topic> topics) {
-
                 if (topics.size()==0)
                     topicAdapter.submitList(forumViewModel.emptyTopicPagedList());
                 else {
                     topicAdapter.submitList(topics);
                     restorePosition(linearLayoutManager,SHARED_OPTIONS);
                 }
+            }
+        });
+        forumViewModel.getTopicsCount(forum_id).observe(this.getViewLifecycleOwner(), new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer count) {
+                if (count!=null)
+                    max_pages_of_topics=count / 40;//на 1 странице умещается 40 тем
             }
         });
 

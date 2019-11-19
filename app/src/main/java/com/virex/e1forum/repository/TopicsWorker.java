@@ -50,7 +50,7 @@ public class TopicsWorker extends Worker {
         switch(action){
             case ACTION_LOAD_FROM_NETWORK:
                 try {
-                    Response<ResponseBody> result= App.getTopicApi().getTopics(forum_id).execute();
+                    Response<ResponseBody> result= App.getTopicApi().getTopics(forum_id,topic_id).execute();
                     if (result.isSuccessful()) {
                         String text=result.body().string();
                         SiteParser.parseTopics(SiteParser.SiteType.PARCE_MOBILE_SITE, text, forum_id, new SiteParser.ParserListener() {

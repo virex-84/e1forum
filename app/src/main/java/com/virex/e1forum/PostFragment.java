@@ -248,7 +248,6 @@ public class PostFragment extends BaseFragment {
             }
         });
 
-        forumViewModel.getPosts(forum_id,topic_id).removeObservers(this);
         forumViewModel.getPosts(forum_id,topic_id).observe(this.getViewLifecycleOwner(), new Observer<PagedList<Post>>() {
             @Override
             public void onChanged(PagedList<Post> posts) {
