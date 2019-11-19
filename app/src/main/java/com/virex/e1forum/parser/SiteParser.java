@@ -281,8 +281,8 @@ public class SiteParser {
         }
     }
 
-    public static String extractError(String html){
+    public static String extractTagText(String html, String tagName){
         Document document = Jsoup.parse(html);
-        return document.getElementsByClass("p-tooltip__error").text();
+        return document.getElementsByClass(tagName).text();
     }
 }

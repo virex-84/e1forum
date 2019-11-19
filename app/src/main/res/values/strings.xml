@@ -25,4 +25,6 @@
     <string name="send_private">Личное сообщение</string>
     <string name="send_to_mail">Отправить письмо на почту</string>
     <string name="send_to_moderator">Сообщить модератору</string>
+    <string name="Title">Заголовок</string>
+    <string name="Text">Текст</string>
 </resources>

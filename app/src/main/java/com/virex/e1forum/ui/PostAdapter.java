@@ -55,8 +55,9 @@ public class PostAdapter extends PagedListAdapter<Post, RecyclerView.ViewHolder>
         void onLinkClick(String link);
         void onUserClick(String userNick, TextView widget);
         void onImageClick(Drawable drawable);
-        //void onVoteClick(int forum_id, int topic_id,  int post_id, VoteType voteType);
         void onVoteClick(Post post, VoteType voteType);
+        void onReplyClick(Post post);
+        void onQuoteClick(Post post);
     }
 
     public PostAdapter(@NonNull DiffUtil.ItemCallback<Post> diffCallback, PostListener postListener, int spanColor, Resources resources) {
@@ -213,6 +214,22 @@ public class PostAdapter extends PagedListAdapter<Post, RecyclerView.ViewHolder>
                     postHolder.btn_quote.setEnabled(true);
                     postHolder.btn_plus.setEnabled(true);
                     postHolder.btn_minus.setEnabled(true);
+
+                    postHolder.btn_reply.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            if (PostAdapter.this.postListener != null)
+                                PostAdapter.this.postListener.onReplyClick(post);
+                        }
+                    });
+                    postHolder.btn_quote.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            if (PostAdapter.this.postListener != null)
+                                PostAdapter.this.postListener.onQuoteClick(post);
+                        }
+                    });
+
                 }
 
                 //реагируем на нажатие ссылок и т.д.

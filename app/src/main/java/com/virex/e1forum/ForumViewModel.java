@@ -205,6 +205,7 @@ public class ForumViewModel extends AndroidViewModel {
 
     public LiveData<WorkInfo> loadPosts(int forum_id, int topic_id, int page_id){
         Data data = new Data.Builder()
+                .putInt(PostsWorker.EXTRA_ACTION, PostsWorker.ACTION_LOAD_FROM_NETWORK)
                 .putInt(PostsWorker.EXTRA_FORUM_ID, forum_id)
                 .putInt(PostsWorker.EXTRA_TOPIC_ID, topic_id)
                 .putInt(PostsWorker.EXTRA_PAGE_ID, page_id)
@@ -277,7 +278,7 @@ public class ForumViewModel extends AndroidViewModel {
                             text.append(line);
                         }
                         //вытаскиваем сообщение об ошибке
-                        String errorLoginMessage= SiteParser.extractError(text.toString());
+                        String errorLoginMessage= SiteParser.extractTagText(text.toString(),"p-tooltip__error");
                         if (!TextUtils.isEmpty(errorLoginMessage)) {
                             if (loginListener != null)
                                 loginListener.onError(errorLoginMessage);
@@ -350,7 +351,6 @@ public class ForumViewModel extends AndroidViewModel {
     }
 
 
-
     public void votePost(final Post post, VoteType voteType, final NetworkListener voteListener){
         App.getPostApi().vote(String.valueOf(post.forum_id),String.valueOf(post.topic_id),String.valueOf(post.id),voteType.name()).enqueue(new Callback<VoteResponse>() {
             @Override
@@ -383,6 +383,55 @@ public class ForumViewModel extends AndroidViewModel {
             public void onFailure(Call<VoteResponse> call, Throwable t) {
                 if (voteListener!=null)
                     voteListener.onError(t.getMessage());
+            }
+        });
+    }
+
+    public void sendPost(final Post post, String subject, String body, final NetworkListener postListener) {
+        App.getPostApi().post(String.valueOf(post.forum_id),String.valueOf(post.topic_id),String.valueOf(post.id),subject,body,"Y").enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    try {
+                        BufferedReader br = new BufferedReader(new InputStreamReader(response.body().byteStream(), "utf-8"));
+                        //вытаскиваем html
+                        StringBuilder text=new StringBuilder();
+                        String line;
+                        while ((line = br.readLine()) != null) {
+                            text.append(line);
+                        }
+                        //вытаскиваем сообщение об ошибке
+                        String errorPostMessage= SiteParser.extractTagText(text.toString(),"danger");
+                        if (!TextUtils.isEmpty(errorPostMessage)) {
+                            if (postListener!=null)
+                                postListener.onError(errorPostMessage);
+                        } else {
+                            if (postListener!=null)
+                                postListener.onSuccess("");
+
+                            //запускаем запрос к серверу на наличие новых постов
+                            Data data = new Data.Builder()
+                                    .putInt(PostsWorker.EXTRA_ACTION, PostsWorker.ACTION_LOAD_FROM_NETWORK)
+                                    .putInt(PostsWorker.EXTRA_FORUM_ID, post.forum_id)
+                                    .putInt(PostsWorker.EXTRA_TOPIC_ID, post.topic_id)
+                                    .putInt(PostsWorker.EXTRA_PAGE_ID, post.id)
+                                    .build();
+                            OneTimeWorkRequest simpleRequest = new OneTimeWorkRequest.Builder(PostsWorker.class).setInputData(data).build();
+
+                            WorkManager.getInstance(application).enqueueUniqueWork("loadPosts", ExistingWorkPolicy.REPLACE,simpleRequest);
+                        }
+
+                    }catch(Exception e){
+                        if (postListener!=null)
+                            postListener.onError(e.getMessage());
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                if (postListener!=null)
+                    postListener.onError(t.getMessage());
             }
         });
     }

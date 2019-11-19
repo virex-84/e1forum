@@ -29,6 +29,7 @@ import com.virex.e1forum.db.entity.User;
 import com.virex.e1forum.network.VoteType;
 import com.virex.e1forum.ui.GlideImageGetter;
 import com.virex.e1forum.ui.PostAdapter;
+import com.virex.e1forum.ui.PostDialog;
 import com.virex.e1forum.ui.SwipyRefreshLayout.SwipyRefreshLayout;
 import com.virex.e1forum.ui.SwipyRefreshLayout.SwipyRefreshLayoutDirection;
 import com.virex.e1forum.ui.ZoomImageDialog;
@@ -61,6 +62,8 @@ public class PostFragment extends BaseFragment {
     private final int ID_MODERATOR=3;
 
     private boolean currentTopicIsClosed=false;
+
+    PostDialog postDialog;
 
 
     @Override
@@ -161,6 +164,38 @@ public class PostFragment extends BaseFragment {
 
                     }
                 });
+            }
+
+            @Override
+            public void onReplyClick(final Post post) {
+                //сохраняем позицию
+                savePosition(linearLayoutManager,SHARED_OPTIONS);
+
+                postDialog = new PostDialog(new PostDialog.OnDialogClickListener() {
+                    @Override
+                    public void onOkClick(String subject, String body) {
+                        postDialog.setStartLoading();
+                        forumViewModel.sendPost(post,  subject, body, new ForumViewModel.NetworkListener() {
+                            @Override
+                            public void onSuccess(String message) {
+                                postDialog.dismiss();
+                            }
+
+                            @Override
+                            public void onError(String message) {
+                                //Toast.makeText(MainActivity.this,message,Toast.LENGTH_SHORT).show();
+                                postDialog.setError(message);
+                                postDialog.setFinishLoading();
+                            }
+                        });
+                    }
+                });
+                postDialog.show(mainactivity.getSupportFragmentManager(),"post");
+            }
+
+            @Override
+            public void onQuoteClick(Post post) {
+
             }
 
         },getResources().getColor(R.color.colorAccent), getResources());
