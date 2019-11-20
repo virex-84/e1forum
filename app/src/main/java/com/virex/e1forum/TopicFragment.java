@@ -16,7 +16,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.work.WorkInfo;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.virex.e1forum.db.entity.Topic;
+import com.virex.e1forum.ui.PostDialog;
 import com.virex.e1forum.ui.SwipyRefreshLayout.SwipyRefreshLayout;
 import com.virex.e1forum.ui.SwipyRefreshLayout.SwipyRefreshLayoutDirection;
 import com.virex.e1forum.ui.TopicAdapter;
@@ -38,6 +40,9 @@ public class TopicFragment extends BaseFragment {
     private SwipyRefreshLayout swipeRefreshLayout;
     private TopicAdapter topicAdapter;
     private ForumViewModel forumViewModel;
+    private FloatingActionButton fab;
+
+    private PostDialog postDialog;
 
     private RecyclerView.LayoutManager linearLayoutManager;
     private String SHARED_OPTIONS;
@@ -61,7 +66,7 @@ public class TopicFragment extends BaseFragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.list_layout,container, false);
+        View view = inflater.inflate(R.layout.topics_layout,container, false);
 
         topicAdapter = new TopicAdapter(Topic.DIFF_CALLBACK, new TopicAdapter.TopicListener() {
             @Override
@@ -121,6 +126,34 @@ public class TopicFragment extends BaseFragment {
                         }
                     }
                 });
+            }
+        });
+
+        fab = view.findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                postDialog = new PostDialog(new PostDialog.OnDialogClickListener() {
+                    @Override
+                    public void onOkClick(String subject, String body) {
+                        postDialog.setStartLoading();
+                        //t и p должны быть 0
+                        forumViewModel.sendPost(forum_id,0,0,  subject, body, new ForumViewModel.NetworkListener() {
+                            @Override
+                            public void onSuccess(String message) {
+                                postDialog.dismiss();
+                            }
+
+                            @Override
+                            public void onError(String message) {
+                                //Toast.makeText(MainActivity.this,message,Toast.LENGTH_SHORT).show();
+                                postDialog.setError(message);
+                                postDialog.setFinishLoading();
+                            }
+                        });
+                    }
+                });
+                postDialog.show(mainactivity.getSupportFragmentManager(),"post");
             }
         });
 

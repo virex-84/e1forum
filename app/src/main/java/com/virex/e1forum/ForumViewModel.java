@@ -392,8 +392,8 @@ public class ForumViewModel extends AndroidViewModel {
         });
     }
 
-    public void sendPost(final Post post, String subject, String body, final NetworkListener postListener) {
-        App.getPostApi().post(String.valueOf(post.forum_id),String.valueOf(post.topic_id),String.valueOf(post.id),subject,body,"Y").enqueue(new Callback<ResponseBody>() {
+    public void sendPost(final int forum_id, final int topic_id, final int post_id, String subject, String body, final NetworkListener postListener) {
+        App.getPostApi().post(String.valueOf(forum_id),String.valueOf(topic_id),String.valueOf(post_id),subject,body,"Y").enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
@@ -417,9 +417,9 @@ public class ForumViewModel extends AndroidViewModel {
                             //запускаем запрос к серверу на наличие новых постов
                             Data data = new Data.Builder()
                                     .putInt(PostsWorker.EXTRA_ACTION, PostsWorker.ACTION_LOAD_FROM_NETWORK)
-                                    .putInt(PostsWorker.EXTRA_FORUM_ID, post.forum_id)
-                                    .putInt(PostsWorker.EXTRA_TOPIC_ID, post.topic_id)
-                                    .putInt(PostsWorker.EXTRA_PAGE_ID, post.id)
+                                    .putInt(PostsWorker.EXTRA_FORUM_ID, forum_id)
+                                    .putInt(PostsWorker.EXTRA_TOPIC_ID, topic_id)
+                                    .putInt(PostsWorker.EXTRA_PAGE_ID, post_id)
                                     .build();
                             OneTimeWorkRequest simpleRequest = new OneTimeWorkRequest.Builder(PostsWorker.class).setInputData(data).build();
 

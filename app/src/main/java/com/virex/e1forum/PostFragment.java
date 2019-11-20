@@ -175,7 +175,7 @@ public class PostFragment extends BaseFragment {
                     @Override
                     public void onOkClick(String subject, String body) {
                         postDialog.setStartLoading();
-                        forumViewModel.sendPost(post,  subject, body, new ForumViewModel.NetworkListener() {
+                        forumViewModel.sendPost(post.forum_id, post.topic_id, post.id, subject, body, new ForumViewModel.NetworkListener() {
                             @Override
                             public void onSuccess(String message) {
                                 postDialog.dismiss();
