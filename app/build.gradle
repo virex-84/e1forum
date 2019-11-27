@@ -29,17 +29,17 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
     //для ночной темы
-    implementation 'com.google.android.material:material:1.2.0-alpha01'
+    implementation 'com.google.android.material:material:1.2.0-alpha02'
 
     //retrofit GET POST
-    implementation 'com.squareup.retrofit2:retrofit:2.3.0'
-    implementation 'com.squareup.retrofit2:converter-gson:2.3.0'
+    implementation 'com.squareup.retrofit2:retrofit:2.6.2'
+    implementation 'com.squareup.retrofit2:converter-gson:2.6.2'
 
     //jsoup: parse html
-    implementation 'org.jsoup:jsoup:1.10.3'
+    implementation 'org.jsoup:jsoup:1.12.1'
 
     //gson
-    implementation 'com.google.code.gson:gson:2.8.5'
+    implementation 'com.google.code.gson:gson:2.8.6'
 
     //ViewModel LiveData
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0-rc02'
@@ -57,9 +57,13 @@ dependencies {
 
     implementation 'androidx.paging:paging-runtime:2.1.0'
 
-    implementation 'com.github.bumptech.glide:glide:4.9.0'
-    implementation "com.github.bumptech.glide:okhttp3-integration:4.9.0"
-    implementation 'com.github.bumptech.glide:annotations:4.9.0'
+    implementation 'com.github.bumptech.glide:glide:4.10.0'
+    implementation "com.github.bumptech.glide:okhttp3-integration:4.10.0"
+    implementation 'com.github.bumptech.glide:annotations:4.10.0'
 
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.9.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.10.0'
+
+    //implementation 'com.github.User:Repo:Tag'
+    //implementation 'com.github.esafirm.android-image-picker:imagepicker:2.0.0'
+    //implementation 'org.kefirsf:kefirbb:1.5'
 }

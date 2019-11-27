@@ -42,7 +42,7 @@ public class GlideImageGetter implements Html.ImageGetter,Drawable.Callback {
 
         final String imgsource;
         if (source.contains("https://www.e1.ru/talk/forum/images/smiles2/")) {
-            imgsource = source.replace("https://www.e1.ru/talk/forum/images/smiles2/", "file:///android_asset/");
+            imgsource = source.replace("https://www.e1.ru/talk/forum/images/smiles2/", "file:///android_asset/icons/");
             result.isLocalImage=true;
         } else
             imgsource=source;

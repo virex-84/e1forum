@@ -14,6 +14,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -285,4 +287,24 @@ public class SiteParser {
         Document document = Jsoup.parse(html);
         return document.getElementsByClass(tagName).text();
     }
+
+    public static String convertBBCodeToE1(String text){
+        text=text.replace("[b]","<b>").replace("[/b]","</b>");
+        text=text.replace("[i]","<i>").replace("[/i]","</i>");
+        text=text.replace("[s]","<s>").replace("[/s]","</s>");
+        text=text.replace("[u]","<u>").replace("[/u]","</u>");
+
+        return text;
+    }
+
+    public static String URLEncodeString(String source){
+        source=source.replace("UTF-8","windows-1251");
+        try {
+            source= URLEncoder.encode(source, "windows-1251");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return source;
+    }
+
 }

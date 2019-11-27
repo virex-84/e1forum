@@ -1,4 +1,4 @@
-<resources>
+﻿<resources>
     <string name="app_name">E1 форум</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -25,6 +25,16 @@
     <string name="send_private">Личное сообщение</string>
     <string name="send_to_mail">Отправить письмо на почту</string>
     <string name="send_to_moderator">Сообщить модератору</string>
-    <string name="Title">Заголовок</string>
-    <string name="Text">Текст</string>
+    <string name="Title">Введите заголовок</string>
+    <string name="Text">Введите текст</string>
+
+    <string name="textBold">Bold</string>
+    <string name="textItalic">Italic</string>
+    <string name="textStrike">Strike</string>
+    <string name="textAlign">Align</string>
+    <string name="ImageUpload">Image</string>
+    <string name="videoUpload">Video</string>
+
+    <string name="insert_code">Введите код</string>
+    <string name="insert_url">Введите URL адрес</string>
 </resources>

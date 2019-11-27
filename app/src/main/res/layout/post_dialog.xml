@@ -2,8 +2,8 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
     tools:layout_editor_absoluteX="0dp"
     tools:layout_editor_absoluteY="0dp"
     android:padding="15dp"
@@ -47,19 +47,95 @@
             android:textSize="20sp"
             />
 
-        <EditText
-            android:id="@+id/input_text"
+        <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/Text"
-            android:singleLine="true"
-            android:inputType="textMultiLine"
-            android:layout_marginBottom="5dp"
-            android:layout_marginLeft="15dp"
-            android:layout_marginRight="15dp"
-            android:layout_marginTop="5dp"
-            android:textSize="20sp"
-            android:minLines="5"
+            android:scrollbars="none"
+            >
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                >
+                <ImageButton
+                    android:id="@+id/action_bold"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_bold"
+                    android:background="@color/colorAccent"
+                    />
+
+                <ImageButton
+                    android:id="@+id/action_italic"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_italic"
+                    android:background="@color/colorAccent"
+                    />
+                <ImageButton
+                    android:id="@+id/action_underline"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_underline"
+                    android:background="@color/colorAccent"
+                    />
+
+                <ImageButton
+                    android:id="@+id/action_strikethrough"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="@color/colorAccent"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_strike" />
+
+                <ImageButton
+                    android:id="@+id/action_code"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_code"
+                    android:background="@color/colorAccent"
+                    />
+
+                <ImageButton
+                    android:id="@+id/action_image"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_image"
+                    android:background="@color/colorAccent"
+                    />
+
+                <ImageButton
+                    android:id="@+id/action_link"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_link"
+                    android:background="@color/colorAccent"
+                    android:visibility="gone"
+                    />
+                <ImageButton
+                    android:id="@+id/action_source"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_source"
+                    android:background="@color/colorAccent"
+                    />
+
+            </LinearLayout>
+        </HorizontalScrollView>
+
+
+        <com.virex.e1forum.ui.RichEditor.RichEditor
+            android:id="@+id/input_text"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
             />
 
         <TextView

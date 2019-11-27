@@ -27,6 +27,7 @@ import com.virex.e1forum.db.entity.Post;
 import com.virex.e1forum.db.entity.Topic;
 import com.virex.e1forum.db.entity.User;
 import com.virex.e1forum.network.VoteType;
+import com.virex.e1forum.parser.SiteParser;
 import com.virex.e1forum.ui.GlideImageGetter;
 import com.virex.e1forum.ui.PostAdapter;
 import com.virex.e1forum.ui.PostDialog;
@@ -63,7 +64,8 @@ public class PostFragment extends BaseFragment {
 
     private boolean currentTopicIsClosed=false;
 
-    PostDialog postDialog;
+    private PostDialog postDialog;
+    private String title;
 
 
     @Override
@@ -171,9 +173,14 @@ public class PostFragment extends BaseFragment {
                 //сохраняем позицию
                 savePosition(linearLayoutManager,SHARED_OPTIONS);
 
-                postDialog = new PostDialog(new PostDialog.OnDialogClickListener() {
+                postDialog = new PostDialog(title, new PostDialog.OnDialogClickListener() {
                     @Override
                     public void onOkClick(String subject, String body) {
+                        body= SiteParser.convertBBCodeToE1(body);
+
+                        subject=SiteParser.URLEncodeString(subject);
+                        body=SiteParser.URLEncodeString(body);
+
                         postDialog.setStartLoading();
                         forumViewModel.sendPost(post.forum_id, post.topic_id, post.id, subject, body, new ForumViewModel.NetworkListener() {
                             @Override
@@ -269,6 +276,7 @@ public class PostFragment extends BaseFragment {
                     currentTopicIsClosed=true;
                     postAdapter.setIsReadOnly(true);
                 }
+                title="Re: ".concat(topic.title);
             }
         });
 

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="user-scalable=no">
+    <!--<meta name="viewport" content="width=device-width">-->
+    <!--<meta name="viewport" content="width=device-width, target-densitydpi=device-dpi"/>-->
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />-
+    <link rel="stylesheet" href="default.min.css" id="theme-style" />
+
+    <script src="sceditor.js"></script>
+    <script src="monocons.js"></script>
+    <script src="bbcode.js"></script>
+    <script src="ru.js"></script>
+
+</head>
+<body>
+<form action="" method="post">
+    <div>
+       <textarea id="example" contenteditable style="height:300px;width:300px;"></textarea>
+    </div>
+</form>
+
+<script>
+			var textarea = document.getElementById('example');
+			sceditor.create(textarea, {
+				format: 'bbcode',
+				icons: 'monocons',
+				style: 'default.min.css'
+			});
+		</script>
+</body>
+</html>

@@ -133,7 +133,7 @@ public class TopicFragment extends BaseFragment {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                postDialog = new PostDialog(new PostDialog.OnDialogClickListener() {
+                postDialog = new PostDialog(null, new PostDialog.OnDialogClickListener() {
                     @Override
                     public void onOkClick(String subject, String body) {
                         postDialog.setStartLoading();

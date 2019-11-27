@@ -51,8 +51,8 @@ public interface PostWebService {
     Call<ResponseBody> post(@Field("f") String forum_id,
                             @Field("t") String topic_id,
                             @Field("p") String post_id,
-                            @Field("subject") String subject,
-                            @Field("body") String body,
+                            @Field(value="subject", encoded=true) String subject,
+                            @Field(value="body", encoded=true) String body,
                             @Field("email_reply") String email_reply
                             );
 }

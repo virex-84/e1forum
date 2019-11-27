@@ -69,7 +69,9 @@ public class PostsWorker extends Worker {
 
                             @Override
                             public void onParse(Post post, SiteParser.ParseStatus parseStatus) {
-                                if (parseStatus== SiteParser.ParseStatus.INPROCESS && post!=null)
+                                if (post==null) return;
+
+                                if (parseStatus== SiteParser.ParseStatus.INPROCESS)
                                     database.postDao().insert(post);
 
                                 //по окончании парсинга постов - нам нужно обновить количество постов в топике
