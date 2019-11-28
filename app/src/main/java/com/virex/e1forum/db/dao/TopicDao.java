@@ -50,4 +50,8 @@ public interface TopicDao {
     //Room это SQLite, и boolean хранится в виде integer поэтому нельзя применить "isBookMark = not isBookMark"
     @Query("select count(*) from topic where forum_id==:forum_id")
     LiveData<Integer> getCount(int forum_id);
+
+    //Room это SQLite, и boolean хранится в виде integer поэтому нельзя применить "isBookMark = not isBookMark"
+    @Query("select count(*) from topic where forum_id==:forum_id and isAttathed=:isAttathed")
+    LiveData<Integer> getCount(int forum_id, boolean isAttathed);
 }

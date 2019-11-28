@@ -112,6 +112,10 @@ public class ForumViewModel extends AndroidViewModel {
         return  database.topicDao().getCount(forum_id);
     }
 
+    public LiveData<Integer> getTopicsCount(int forum_id, boolean isAttathed){
+        return  database.topicDao().getCount(forum_id,isAttathed);
+    }
+
     public LiveData<WorkInfo> loadTopics(int forum_id, int topic_id){
         Data data = new Data.Builder()
                 .putInt(TopicsWorker.EXTRA_ACTION, TopicsWorker.ACTION_LOAD_FROM_NETWORK)

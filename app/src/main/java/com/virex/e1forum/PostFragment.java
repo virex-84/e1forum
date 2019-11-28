@@ -47,10 +47,9 @@ public class PostFragment extends BaseFragment {
     private int forum_id=0;
     private int topic_id=0;
 
-    private int max_pages=0;
-
     private int current_page_id=0;
 
+    private RecyclerView recyclerView;
     private RecyclerView.LayoutManager linearLayoutManager;
     private String SHARED_OPTIONS;
 
@@ -139,13 +138,6 @@ public class PostFragment extends BaseFragment {
                     //не открываем окно просмотра для локальных смайлов
                     if (((GlideImageGetter.FutureDrawable) drawable).isLocalImage) return;
 
-                    /*
-                    Toast toast = Toast.makeText(getContext(), "OPEN", Toast.LENGTH_SHORT);
-                    ImageView imageView = new ImageView(getContext());
-                    imageView.setImageDrawable(drawable.getCurrent());
-                    toast.setView(imageView);
-                    toast.show();
-                    */
                     ZoomImageDialog zoomImageDialog = new ZoomImageDialog(drawable.getCurrent());
                     zoomImageDialog.show(mainactivity.getSupportFragmentManager(), "zoom_image");
                 }
@@ -207,7 +199,7 @@ public class PostFragment extends BaseFragment {
 
         },getResources().getColor(R.color.colorAccent), getResources());
 
-        RecyclerView recyclerView = view.findViewById(R.id.recyclerView);
+        recyclerView = view.findViewById(R.id.recyclerView);
         recyclerView.setHasFixedSize(true);
         linearLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(linearLayoutManager);
@@ -231,12 +223,14 @@ public class PostFragment extends BaseFragment {
                     current_page_id=0;
                 //если обновляют снизу - увеличиваем счетчик
                 } else if (direction==SwipyRefreshLayoutDirection.BOTTOM) {
-                    if (max_pages>current_page_id)
-                        current_page_id=current_page_id+1;
-
-                    if (max_pages>current_page_id)
-                        current_page_id=current_page_id+1;
+                    int current_page_position=recyclerView.getAdapter().getItemCount();//((LinearLayoutManager)linearLayoutManager).findLastVisibleItemPosition();
+                    current_page_id=current_page_position / 25;
                 }
+                /*
+                  логика обновления проста:
+                  если постов например 5, то при делении на 25 = 0, поэтому будем обновлять текущую (нулевую) страницу
+                  если постов например 30, то 30/25=1,2 (остаток 2 отбрасывается), поэтому будем обновлять вторую страницу (номер 1, т.к. нумерация с нуля)
+                */
                 forumViewModel.loadPosts(forum_id,topic_id,current_page_id).observe(PostFragment.this.getViewLifecycleOwner(), new Observer<WorkInfo>() {
                     @Override
                     public void onChanged(WorkInfo workInfo) {
@@ -258,7 +252,6 @@ public class PostFragment extends BaseFragment {
         forumViewModel.getPosts(forum_id,topic_id).observe(this.getViewLifecycleOwner(), new Observer<PagedList<Post>>() {
             @Override
             public void onChanged(PagedList<Post> posts) {
-
                 if (posts.size()==0)
                     postAdapter.submitList(forumViewModel.emptyPostPagedList());
                 else {
@@ -271,7 +264,6 @@ public class PostFragment extends BaseFragment {
         forumViewModel.getTopicLive(forum_id,topic_id).observe(this.getViewLifecycleOwner(), new Observer<Topic>() {
             @Override
             public void onChanged(Topic topic) {
-                max_pages=topic.pagesCount;
                 if (topic.isClosed) {
                     currentTopicIsClosed=true;
                     postAdapter.setIsReadOnly(true);

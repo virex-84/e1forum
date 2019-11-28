@@ -109,7 +109,7 @@ public class TopicFragment extends BaseFragment {
                     current_topic_id=0;
                     //если обновляют снизу - увеличиваем счетчик
                 } else if (direction==SwipyRefreshLayoutDirection.BOTTOM) {
-                    current_topic_id=max_pages_of_topics+1;
+                    current_topic_id=max_pages_of_topics;
                 }
                 forumViewModel.loadTopics(forum_id,current_topic_id).observe(TopicFragment.this.getViewLifecycleOwner(), new Observer<WorkInfo>() {
                     @Override
@@ -168,7 +168,8 @@ public class TopicFragment extends BaseFragment {
                 }
             }
         });
-        forumViewModel.getTopicsCount(forum_id).observe(this.getViewLifecycleOwner(), new Observer<Integer>() {
+        //fix на первой странице могут быть приаттаченные темы - их не учитываем т.к. будет больше 40 тем на форум
+        forumViewModel.getTopicsCount(forum_id,false).observe(this.getViewLifecycleOwner(), new Observer<Integer>() {
             @Override
             public void onChanged(Integer count) {
                 if (count!=null)
