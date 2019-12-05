@@ -1,6 +1,7 @@
 package com.virex.e1forum;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -14,6 +15,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.lifecycle.Observer;
 import androidx.paging.PagedList;
@@ -59,7 +61,6 @@ public class PostFragment extends BaseFragment {
 
     private final int ID_LK=1;
     private final int ID_MAIL=2;
-    private final int ID_MODERATOR=3;
 
     private boolean currentTopicIsClosed=false;
 
@@ -96,7 +97,7 @@ public class PostFragment extends BaseFragment {
                 //т.к. после обновления страницы onChanged сработает заново и мы получим кучу диалоговых окон
                 LiveDataUtils.observeOnce(forumViewModel.getUser(userNick), PostFragment.this.getViewLifecycleOwner(), new Observer<User>() {
                     @Override
-                    public void onChanged(User user) {
+                    public void onChanged(final User user) {
                         if (user==null) return;
 
                         //всплывающее меню для пользователя
@@ -108,10 +109,9 @@ public class PostFragment extends BaseFragment {
                             public boolean onMenuItemClick(MenuItem item) {
                                 switch(item.getItemId()){
                                     case ID_LK:
+                                        sendLK(user.actionLK);
                                         break;
                                     case ID_MAIL:
-                                        break;
-                                    case ID_MODERATOR:
                                         break;
                                 }
                                 return false;
@@ -119,7 +119,6 @@ public class PostFragment extends BaseFragment {
                         });
                         if (user.actionLK!=null) popup.getMenu().add(0,ID_LK,0,getString(R.string.send_private));
                         if (user.actionMail!=null) popup.getMenu().add(0,ID_MAIL,0,getString(R.string.send_to_mail));
-                        if (user.id>0) popup.getMenu().add(0,ID_MODERATOR,0,getString(R.string.send_to_moderator));
                         popup.show();
                     }
                 });
@@ -161,40 +160,37 @@ public class PostFragment extends BaseFragment {
             }
 
             @Override
-            public void onReplyClick(final Post post) {
-                //сохраняем позицию
-                savePosition(linearLayoutManager,SHARED_OPTIONS);
-
-                postDialog = new PostDialog(title, new PostDialog.OnDialogClickListener() {
-                    @Override
-                    public void onOkClick(String subject, String body) {
-                        body= SiteParser.convertBBCodeToE1(body);
-
-                        subject=SiteParser.URLEncodeString(subject);
-                        body=SiteParser.URLEncodeString(body);
-
-                        postDialog.setStartLoading();
-                        forumViewModel.sendPost(post.forum_id, post.topic_id, post.id, subject, body, new ForumViewModel.NetworkListener() {
-                            @Override
-                            public void onSuccess(String message) {
-                                postDialog.dismiss();
-                            }
-
-                            @Override
-                            public void onError(String message) {
-                                //Toast.makeText(MainActivity.this,message,Toast.LENGTH_SHORT).show();
-                                postDialog.setError(message);
-                                postDialog.setFinishLoading();
-                            }
-                        });
-                    }
-                });
-                postDialog.show(mainactivity.getSupportFragmentManager(),"post");
+            public void onReplyClick(Post post) {
+                sendPost(post,false);
             }
 
             @Override
             public void onQuoteClick(Post post) {
+                sendPost(post,true);
+            }
 
+            @Override
+            public void onModeratorClick(final Post post) {
+                AlertDialog.Builder dialog = new AlertDialog.Builder(maincontext);
+                dialog.setCancelable(true);
+                dialog.setMessage(getString(R.string.send_to_moderator));
+                dialog.setPositiveButton(getString(R.string.Ok), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        forumViewModel.sendModerator(post.forum_id, post.id, new ForumViewModel.NetworkListener() {
+                            @Override
+                            public void onSuccess(String message) {
+                                Toast.makeText(maincontext,R.string.send_moderator_success,Toast.LENGTH_SHORT).show();
+                            }
+
+                            @Override
+                            public void onError(String message) {
+                                Toast.makeText(maincontext,message,Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                        dialog.dismiss();
+                    }
+                }).setNegativeButton(getString(R.string.Cancel),null).show();
             }
 
         },getResources().getColor(R.color.colorAccent), getResources());
@@ -284,6 +280,68 @@ public class PostFragment extends BaseFragment {
 
 
         return view;
+    }
+
+    private void sendPost(final Post post, boolean isQuote){
+        //сохраняем позицию
+        savePosition(linearLayoutManager,SHARED_OPTIONS);
+
+        postDialog = new PostDialog(title, new PostDialog.OnDialogClickListener() {
+            @Override
+            public void onOkClick(String subject, String body) {
+                body= SiteParser.convertBBCodeToE1(body);
+
+                subject=SiteParser.URLEncodeString(subject);
+                body=SiteParser.URLEncodeString(body);
+
+                postDialog.setStartLoading();
+                forumViewModel.sendPost(post.forum_id, post.topic_id, post.id, subject, body, new ForumViewModel.NetworkListener() {
+                    @Override
+                    public void onSuccess(String message) {
+                        postDialog.dismiss();
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        //Toast.makeText(MainActivity.this,message,Toast.LENGTH_SHORT).show();
+                        postDialog.setError(message);
+                        postDialog.setFinishLoading();
+                    }
+                });
+            }
+        });
+        if (isQuote)
+            postDialog.setQuote(post.user, post.text);
+        postDialog.show(mainactivity.getSupportFragmentManager(),"post");
+    }
+
+    private void sendLK(final String actionLK){
+        postDialog = new PostDialog(title, new PostDialog.OnDialogClickListener() {
+            @Override
+            public void onOkClick(String subject, String body) {
+                body= SiteParser.convertBBCodeToE1(body);
+
+                subject=SiteParser.URLEncodeString(subject);
+                body=SiteParser.URLEncodeString(body);
+
+                postDialog.setStartLoading();
+
+                forumViewModel.sendLK(SiteParser.extractQuotedString(actionLK), subject, body, new ForumViewModel.NetworkListener() {
+                    @Override
+                    public void onSuccess(String message) {
+                        Toast.makeText(maincontext,getString(R.string.send_private_success),Toast.LENGTH_SHORT).show();
+                        postDialog.dismiss();
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        postDialog.setError(message);
+                        postDialog.setFinishLoading();
+                    }
+                });
+            }
+        });
+        postDialog.show(mainactivity.getSupportFragmentManager(),"sendLK");
     }
 
     @Override

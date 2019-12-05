@@ -1,6 +1,7 @@
 package com.virex.e1forum.parser;
 
 import android.net.Uri;
+import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 
@@ -20,7 +21,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /*
  корявый парсер сайта
@@ -288,13 +292,75 @@ public class SiteParser {
         return document.getElementsByClass(tagName).text();
     }
 
+    public static String clearTags(String html){
+        if (TextUtils.isEmpty(html))
+            return null;
+        Document document = Jsoup.parse(html);
+        return document.text();
+    }
+
+    public static HashMap<String, String> extractFormValues(String html){
+        HashMap<String, String> result= new HashMap<>();
+
+        Document document = Jsoup.parse(html);
+        Element postform = document.getElementById("postform");
+
+        if (postform==null) return result;
+
+        Elements inputElements = postform.getElementsByTag("input");
+
+        for (Element inputElement : inputElements) {
+            String key = inputElement.attr("name");
+            String value = inputElement.attr("value");
+            result.put(key,value);
+        }
+        return result;
+    }
+
+    public static String extractQuotedString(String text){
+        Pattern p = Pattern.compile("'([^']*)'");
+        Matcher m = p.matcher(text);
+        while (m.find()) {
+            return m.group(1);
+        }
+        return null;
+    }
+
     public static String convertBBCodeToE1(String text){
         text=text.replace("[b]","<b>").replace("[/b]","</b>");
         text=text.replace("[i]","<i>").replace("[/i]","</i>");
         text=text.replace("[s]","<s>").replace("[/s]","</s>");
         text=text.replace("[u]","<u>").replace("[/u]","</u>");
 
+        //уникальный для е1 тег nickname
+        text=replaceQuote(text);
+
         return text;
+    }
+
+    //[quote=rib65] -> [quote][nickname]rib65[/nickname]
+    private static String replaceQuote(String text){
+        StringBuffer result=new StringBuffer(text);
+
+        //поиск в html тегах
+        Pattern word = Pattern.compile("\\[/?(?:quote|code|img|color|size)*?.*?]",Pattern.CASE_INSENSITIVE);
+        Matcher match = word.matcher(text);
+
+        while (match.find()) {
+            //исходное найденное слово (написанное например капсом)
+            String src=match.group();
+            //удаляем кавычки
+            src=src.replace("[","").replace("]","");
+
+            if (src.contains("quote=")){
+                String[] items=src.split("=");
+
+                src=String.format("[quote][nickname]%s[/nickname]",items[1]);
+
+                result.replace(match.start(),match.end(), src);
+            }
+        }
+        return result.toString();
     }
 
     public static String URLEncodeString(String source){

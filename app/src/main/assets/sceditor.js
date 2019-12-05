@@ -6388,7 +6388,9 @@
                android.onUpdateStatus(objects[j],state);
               }
 			}
-			android.onUpdateToolbar();
+			if (typeof(android) !== "undefined"){
+			  android.onUpdateToolbar();
+			}
 
 			if (base.readOnly()) {
 				each(find(toolbar, activeClass), function (_, menuItem) {
@@ -7349,7 +7351,9 @@
 		 */
 		triggerValueChanged = function (saveRange) {
 			if (typeof(android) !== "undefined"){///!!!
-              android.onData(base.val());
+               android.onData(base.val());
+             // android.onData(base.fromBBCode(base.val()));
+
             }
 
 			if (!pluginManager ||
@@ -7637,5 +7641,13 @@
 			return textarea._sceditor;
 		}
 	};
+
+			setTimeout(function () {
+			    if (typeof(android) !== "undefined"){
+                  android.onLoaded();
+                }
+			},1000);
+
+
 
 }());

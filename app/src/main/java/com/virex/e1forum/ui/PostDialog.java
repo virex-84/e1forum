@@ -18,6 +18,7 @@ import androidx.core.text.HtmlCompat;
 import androidx.fragment.app.DialogFragment;
 
 import com.virex.e1forum.R;
+import com.virex.e1forum.parser.SiteParser;
 import com.virex.e1forum.ui.RichEditor.REStatus;
 import com.virex.e1forum.ui.RichEditor.RichEditor;
 
@@ -33,6 +34,8 @@ public class PostDialog extends DialogFragment {
     private OnDialogClickListener onDialogClickListener;
     private View.OnClickListener onClickListener;
     private String title;
+    private String quote;
+    private String nickname;
 
     public interface OnDialogClickListener {
         void onOkClick(String subject, String body);
@@ -47,6 +50,11 @@ public class PostDialog extends DialogFragment {
         this.title=title;
     }
 
+    public void setQuote(String nickname, String quote){
+        this.nickname=SiteParser.clearTags(nickname);
+        this.quote=SiteParser.clearTags(quote);
+    }
+
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
@@ -59,6 +67,7 @@ public class PostDialog extends DialogFragment {
         progressBar = rootview.findViewById(R.id.progressBar);
 
         input_text = rootview.findViewById(R.id.input_text);
+
         input_text.requestFocus();
 
         onClickListener = new View.OnClickListener() {
@@ -117,6 +126,20 @@ public class PostDialog extends DialogFragment {
                         rootview.findViewById(R.id.action_italic).setBackgroundResource(toolbarStatus.isItalic ? R.color.colorPrimary : R.color.colorAccent);
                         rootview.findViewById(R.id.action_underline).setBackgroundResource(toolbarStatus.isUnderline ? R.color.colorPrimary : R.color.colorAccent);
                         rootview.findViewById(R.id.action_strikethrough).setBackgroundResource(toolbarStatus.isStrike ? R.color.colorPrimary : R.color.colorAccent);
+                    }
+                });
+            }
+
+            @Override
+            public void onLoaded() {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (!TextUtils.isEmpty(nickname) && !TextUtils.isEmpty(quote))
+                            input_text.addQuote(nickname, quote);
+                        else
+                        if (!TextUtils.isEmpty(quote))
+                            input_text.addQuote(quote);
                     }
                 });
             }

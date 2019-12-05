@@ -58,6 +58,7 @@ public class PostAdapter extends PagedListAdapter<Post, RecyclerView.ViewHolder>
         void onVoteClick(Post post, VoteType voteType);
         void onReplyClick(Post post);
         void onQuoteClick(Post post);
+        void onModeratorClick(Post post);
     }
 
     public PostAdapter(@NonNull DiffUtil.ItemCallback<Post> diffCallback, PostListener postListener, int spanColor, Resources resources) {
@@ -209,9 +210,11 @@ public class PostAdapter extends PagedListAdapter<Post, RecyclerView.ViewHolder>
                 if (isReadOnly){
                     postHolder.btn_reply.setEnabled(false);
                     postHolder.btn_quote.setEnabled(false);
+                    postHolder.btn_moderator.setEnabled(false);
                 } else {
                     postHolder.btn_reply.setEnabled(true);
                     postHolder.btn_quote.setEnabled(true);
+                    postHolder.btn_moderator.setEnabled(true);
                     postHolder.btn_plus.setEnabled(true);
                     postHolder.btn_minus.setEnabled(true);
 
@@ -229,7 +232,13 @@ public class PostAdapter extends PagedListAdapter<Post, RecyclerView.ViewHolder>
                                 PostAdapter.this.postListener.onQuoteClick(post);
                         }
                     });
-
+                    postHolder.btn_moderator.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            if (PostAdapter.this.postListener != null)
+                                PostAdapter.this.postListener.onModeratorClick(post);
+                        }
+                    });
                 }
 
                 //реагируем на нажатие ссылок и т.д.
@@ -284,7 +293,7 @@ public class PostAdapter extends PagedListAdapter<Post, RecyclerView.ViewHolder>
         TextView tv_text;
         Button btn_reply;
         ImageButton btn_quote;
-        ImageButton btn_share;
+        ImageButton btn_moderator;
         TextView tv_carma_plus;
         TextView tv_carma_minus;
         Button btn_plus;
@@ -305,7 +314,7 @@ public class PostAdapter extends PagedListAdapter<Post, RecyclerView.ViewHolder>
             tv_date = itemView.findViewById(R.id.tv_date);
             btn_reply = itemView.findViewById(R.id.btn_reply);
             btn_quote = itemView.findViewById(R.id.btn_quote);
-            btn_share = itemView.findViewById(R.id.btn_share);
+            btn_moderator = itemView.findViewById(R.id.btn_moderator);
             tv_carma_plus = itemView.findViewById(R.id.tv_carma_plus);
             tv_carma_minus = itemView.findViewById(R.id.tv_carma_minus);
             btn_plus = itemView.findViewById(R.id.btn_plus);

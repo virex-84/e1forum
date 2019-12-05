@@ -29,10 +29,11 @@ import com.virex.e1forum.repository.PostsWorker;
 import com.virex.e1forum.repository.TopicsWorker;
 
 import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Executors;
 
@@ -261,17 +262,6 @@ public class ForumViewModel extends AndroidViewModel {
         WorkManager.getInstance(application).beginUniqueWork("checkForumBookmark", ExistingWorkPolicy.REPLACE,simpleRequest).enqueue();
     }
 
-    //кодирование для post запросов
-    public static String URLEncodeString(String source){
-        //source=source.replace("UTF-8","windows-1251");
-        try {
-            source= URLEncoder.encode(source, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        return source;
-    }
-
     public void loginSite(String login, String password, final NetworkListener loginListener){
         //пробуем залогиниться
         App.getPostApi().login("login",login,password).enqueue(new Callback<ResponseBody>() {
@@ -279,13 +269,8 @@ public class ForumViewModel extends AndroidViewModel {
             public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
                     try {
-                        BufferedReader br = new BufferedReader(new InputStreamReader(response.body().byteStream(), "utf-8"));
                         //вытаскиваем html
-                        StringBuilder text=new StringBuilder();
-                        String line;
-                        while ((line = br.readLine()) != null) {
-                            text.append(line);
-                        }
+                        StringBuilder text=readStream(response.body().byteStream(),"utf-8");
                         //вытаскиваем сообщение об ошибке
                         String errorLoginMessage= SiteParser.extractTagText(text.toString(),"p-tooltip__error");
                         if (!TextUtils.isEmpty(errorLoginMessage)) {
@@ -402,13 +387,7 @@ public class ForumViewModel extends AndroidViewModel {
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
                     try {
-                        BufferedReader br = new BufferedReader(new InputStreamReader(response.body().byteStream(), "utf-8"));
-                        //вытаскиваем html
-                        StringBuilder text=new StringBuilder();
-                        String line;
-                        while ((line = br.readLine()) != null) {
-                            text.append(line);
-                        }
+                        StringBuilder text=readStream(response.body().byteStream(),"utf-8");
                         //вытаскиваем сообщение об ошибке
                         String errorPostMessage= SiteParser.extractTagText(text.toString(),"danger");
                         if (!TextUtils.isEmpty(errorPostMessage)) {
@@ -445,7 +424,119 @@ public class ForumViewModel extends AndroidViewModel {
         });
     }
 
+    public void sendModerator(int forum_id,int post_id, final NetworkListener postListener){
+        //https://www.e1.ru/talk/forum/moderator.php?f=22&m=64253&mobile=1
+        App.getPostApi().sendModerator(forum_id,post_id).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    try {
+                        StringBuilder text=readStream(response.body().byteStream(),"windows-1251");
+
+                        if (text.toString().contains("Спасибо")){
+                            if (postListener!=null)
+                                postListener.onSuccess("");
+                        } else {
+                            if (postListener!=null)
+                                postListener.onError(text.toString());
+                        }
+                    }catch(IOException e){
+                        if (postListener!=null)
+                            postListener.onError(e.getMessage());
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                if (postListener!=null)
+                    postListener.onError(t.getMessage());
+            }
+        });
+    }
+
+    public void sendLK(String user_id, final String theme, final String body, final NetworkListener postListener){
+        App.getPostApi().prepareLK(user_id).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                try {
+                    final StringBuilder text=readStream(response.body().byteStream(),"windows-1251");
+                    HashMap<String, String> values= SiteParser.extractFormValues(text.toString());
+
+                    if (values.size()==0) {
+                        if (postListener!=null)
+                            postListener.onError(getString(R.string.send_private_error));
+                        return;
+                    }
+
+                    App.getPostApi().sendLK(
+                            "1",
+                            values.get("type_message"),
+                            values.get("type_message_checksum"),
+                            values.get("type_send"),
+                            values.get("type_send_checksum"),
+                            values.get("service_id"),
+                            values.get("service_id_checksum"),
+                            values.get("sender"),
+                            values.get("sender_checksum"),
+                            values.get("recipient"),
+                            values.get("recipient_checksum"),
+                            values.get("dialog_id"),
+                            values.get("dialog_id_checksum"),
+                            values.get("protected_list"),
+                            values.get("protected_list_checksum"),
+                            theme,
+                            body,
+                            SiteParser.URLEncodeString("Отправить")
+                            ).enqueue(new Callback<ResponseBody>() {
+                        @Override
+                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                            try {
+                                StringBuilder result = readStream(response.body().byteStream(),"windows-1251");
+                                if (result.toString().contains("Ваше сообщение отправлено")){
+                                    if (postListener!=null)
+                                        postListener.onSuccess("");
+                                } else {
+                                    if (postListener!=null)
+                                        postListener.onError(text.toString());
+                                }
+                            } catch (IOException e) {
+                                if (postListener!=null)
+                                    postListener.onError(e.getMessage());
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<ResponseBody> call, Throwable t) {
+                            if (postListener!=null)
+                                postListener.onError(t.getMessage());
+                        }
+                    });
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                if (postListener!=null)
+                    postListener.onError(t.getMessage());
+            }
+        });
+    }
+
     private String getString(int resId){
         return getApplication().getString(resId);
+    }
+
+    private StringBuilder readStream(InputStream is, String charsetName) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(is, charsetName));
+        //вытаскиваем html
+        StringBuilder text=new StringBuilder();
+        String line;
+        while ((line = br.readLine()) != null) {
+            text.append(line);
+        }
+        return text;
     }
 }

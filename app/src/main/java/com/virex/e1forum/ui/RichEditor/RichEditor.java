@@ -6,13 +6,10 @@ import android.os.Build;
 import android.util.AttributeSet;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
-import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import androidx.annotation.NonNull;
-
-import java.io.UnsupportedEncodingException;
 
 public class RichEditor extends WebView {
 
@@ -24,6 +21,7 @@ public class RichEditor extends WebView {
         void onStrike(boolean value);
         */
         void onUpdateToolbar(REStatus toolbarStatus);
+        void onLoaded();
     }
 
     private static final String SETUP_HTML = "file:///android_asset/editor.html";
@@ -74,6 +72,16 @@ public class RichEditor extends WebView {
 
     public void setValue(@NonNull String value){
         exec(String.format("javascript:sceditor.instance(document.getElementById('example')).execCommand('%s');",value));
+    }
+
+    public void addQuote(@NonNull String quote){
+        //exec(String.format("javascript:sceditor.instance(document.getElementById('example')).wysiwygEditorInsertHtml( '<br><quote>%s<br></quote><br>');",quote));
+        exec(String.format("javascript:sceditor.instance(document.getElementById('example')).insert( '[quote]%s[/quote]');",quote));
+    }
+
+    public void addQuote(@NonNull String nickname, @NonNull String quote){
+        //exec(String.format("javascript:sceditor.instance(document.getElementById('example')).wysiwygEditorInsertHtml( '<br><quote><nickname>%s</nickname><br>%s</quote><br>');",nickname,quote));
+        exec(String.format("javascript:sceditor.instance(document.getElementById('example')).insert( '[quote=%s]%s[/quote] ');",nickname,quote));
     }
 
     /*
@@ -146,6 +154,13 @@ public class RichEditor extends WebView {
         //тут мы обновляем тулбар
         if (stateListener!=null)
             stateListener.onUpdateToolbar(toolbarStatus);
+    }
+
+    @JavascriptInterface
+    public void onLoaded() {
+        //тут js едитор готов
+        if (stateListener!=null)
+            stateListener.onLoaded();
     }
 
     public void setStateListener(StateListener stateListener){

@@ -8,6 +8,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 /**
  * Работа с сетью. Форумы
@@ -55,4 +56,34 @@ public interface PostWebService {
                             @Field(value="body", encoded=true) String body,
                             @Field("email_reply") String email_reply
                             );
+
+    //https://www.e1.ru/talk/forum/moderator.php?f=22&m=64253&mobile=1
+    @GET("https://www.e1.ru/talk/forum/moderator.php")
+    Call<ResponseBody> sendModerator(@Query("f") int forum_id, @Query("m") int post_id);
+
+    //https://www.e1.ru/talk/forum/pm/message.php?u=21580372p5266bae852ef5bc4f9b242e13a6bdfe8
+    @GET("https://www.e1.ru/talk/forum/pm/message.php")
+    Call<ResponseBody> prepareLK(@Query("u") String user_id);
+
+    @FormUrlEncoded
+    @POST("https://www.e1.ru/talk/forum/pm/message.php")
+    Call<ResponseBody> sendLK(@Field("_submit") String _submit,
+                              @Field("type_message") String type_message,
+                              @Field("type_message_checksum") String type_message_checksum,
+                              @Field("type_send") String type_send,
+                              @Field("type_send_checksum") String type_send_checksum,
+                              @Field("service_id") String service_id,
+                              @Field("service_id_checksum") String service_id_checksum,
+                              @Field("sender") String sender,
+                              @Field("sender_checksum") String sender_checksum,
+                              @Field("recipient") String recipient,
+                              @Field("recipient_checksum") String recipient_checksum,
+                              @Field("dialog_id") String dialog_id,
+                              @Field("dialog_id_checksum") String dialog_id_checksum,
+                              @Field("protected_list") String protected_list,
+                              @Field("protected_list_checksum") String protected_list_checksum,
+                              @Field(value="theme", encoded=true) String theme,
+                              @Field(value="body", encoded=true) String body,
+                              @Field(value="send", encoded=true) String send
+    );
 }

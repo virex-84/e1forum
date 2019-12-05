@@ -17,14 +17,18 @@
     <string name="Logout">Выход</string>
     <string name="Password">Пароль</string>
     <string name="Cancel">Отмена</string>
+    <string name="Post">Ответ</string>
     <string name="error_empty_text">Необходимо заполнить</string>
     <string name="login_success">Вы успешно залогинены!</string>
     <string name="login_error">Ошибка</string>
     <string name="logout_warning">Вы действительно хотите разлогиниться?</string>
     <string name="vote_error">Ошибка</string>
+    <string name="send_moderator_success">Сообщение отправлено модератору!</string>
     <string name="send_private">Личное сообщение</string>
+    <string name="send_private_error">Ошибка</string>
+    <string name="send_private_success">Сообщение в личный кабинет отправлено!</string>
     <string name="send_to_mail">Отправить письмо на почту</string>
-    <string name="send_to_moderator">Сообщить модератору</string>
+    <string name="send_to_moderator">Сообщить модератору?</string>
     <string name="Title">Введите заголовок</string>
     <string name="Text">Введите текст</string>
 

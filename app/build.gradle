@@ -34,6 +34,7 @@ dependencies {
     //retrofit GET POST
     implementation 'com.squareup.retrofit2:retrofit:2.6.2'
     implementation 'com.squareup.retrofit2:converter-gson:2.6.2'
+    //implementation 'com.squareup.okhttp3:logging-interceptor:3.9.0' //логирование запросов
 
     //jsoup: parse html
     implementation 'org.jsoup:jsoup:1.12.1'
@@ -49,8 +50,8 @@ dependencies {
     implementation "androidx.work:work-runtime:2.2.0"
 
     //Room
-    implementation "androidx.room:room-runtime:2.2.1"
-    annotationProcessor "androidx.room:room-compiler:2.2.1"
+    implementation "androidx.room:room-runtime:2.2.2"
+    annotationProcessor "androidx.room:room-compiler:2.2.2"
 
     //поддержка свайпа. у нас есть свой SwipyRefreshLayout поддерживающий свайп и вниз и вверх
     //implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.0.0'
