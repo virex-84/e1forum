@@ -61,6 +61,7 @@ public class PostFragment extends BaseFragment {
 
     private final int ID_LK=1;
     private final int ID_MAIL=2;
+    private final int ID_ABOUT=3;
 
     private boolean currentTopicIsClosed=false;
 
@@ -108,6 +109,9 @@ public class PostFragment extends BaseFragment {
                             @Override
                             public boolean onMenuItemClick(MenuItem item) {
                                 switch(item.getItemId()){
+                                    case ID_ABOUT:
+                                        aboutUser(user.user_id);
+                                        break;
                                     case ID_LK:
                                         sendLK(user.actionLK);
                                         break;
@@ -119,6 +123,7 @@ public class PostFragment extends BaseFragment {
                         });
                         if (user.actionLK!=null) popup.getMenu().add(0,ID_LK,0,getString(R.string.send_private));
                         if (user.actionMail!=null) popup.getMenu().add(0,ID_MAIL,0,getString(R.string.send_to_mail));
+                        if (user.user_id>0) popup.getMenu().add(0,ID_ABOUT,0,getString(R.string.about_user));
                         popup.show();
                     }
                 });
@@ -342,6 +347,28 @@ public class PostFragment extends BaseFragment {
             }
         });
         postDialog.show(mainactivity.getSupportFragmentManager(),"sendLK");
+    }
+
+    private void aboutUser(int user_id){
+        forumViewModel.aboutUser(user_id, new ForumViewModel.NetworkListener() {
+            @Override
+            public void onSuccess(String message) {
+                AlertDialog.Builder dialog = new AlertDialog.Builder(maincontext);
+                dialog.setCancelable(true);
+                dialog.setMessage(message);
+                dialog.setPositiveButton(getString(R.string.Ok), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.dismiss();
+                    }
+                }).show();
+            }
+
+            @Override
+            public void onError(String message) {
+
+            }
+        });
     }
 
     @Override

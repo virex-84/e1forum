@@ -86,4 +86,8 @@ public interface PostWebService {
                               @Field(value="body", encoded=true) String body,
                               @Field(value="send", encoded=true) String send
     );
+
+    //www.e1.ru/talk/forum/personal_info.php?user=
+    @GET("https://www.e1.ru/talk/forum/personal_info.php")
+    Call<ResponseBody> aboutUser(@Query("user") int user_id);
 }

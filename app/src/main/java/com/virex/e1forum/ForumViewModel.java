@@ -34,7 +34,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 
 import okhttp3.ResponseBody;
@@ -64,15 +66,15 @@ public class ForumViewModel extends AndroidViewModel {
         privIsLogin.postValue(((App)getApplication()).initIsLogin());
     }
 
-    public LiveData<Boolean> isLogin() {
+    LiveData<Boolean> isLogin() {
         return privIsLogin;
     }
 
-    public LiveData<List<Forum>> getForums(){
+    LiveData<List<Forum>> getForums(){
         return database.forumDao().dataSource();
     }
 
-    public LiveData<WorkInfo> loadForums(){
+    LiveData<WorkInfo> loadForums(){
         Data data = new Data.Builder()
                 .putInt(TopicsWorker.EXTRA_ACTION, TopicsWorker.ACTION_LOAD_FROM_NETWORK)
                 .build();
@@ -83,7 +85,7 @@ public class ForumViewModel extends AndroidViewModel {
         return WorkManager.getInstance(getApplication()).getWorkInfoByIdLiveData(simpleRequest.getId());
     }
 
-    public LiveData<PagedList<Topic>> getTopics(final int forum_id){
+    LiveData<PagedList<Topic>> getTopics(final int forum_id){
         //return database.topicDao().dataSource(forum_id);
         LiveData<PagedList<Topic>> pagedListLiveData;
 
@@ -109,15 +111,11 @@ public class ForumViewModel extends AndroidViewModel {
 
     }
 
-    public LiveData<Integer> getTopicsCount(int forum_id){
-        return  database.topicDao().getCount(forum_id);
-    }
-
-    public LiveData<Integer> getTopicsCount(int forum_id, boolean isAttathed){
+    LiveData<Integer> getTopicsCount(int forum_id, boolean isAttathed){
         return  database.topicDao().getCount(forum_id,isAttathed);
     }
 
-    public LiveData<WorkInfo> loadTopics(int forum_id, int topic_id){
+    LiveData<WorkInfo> loadTopics(int forum_id, int topic_id){
         Data data = new Data.Builder()
                 .putInt(TopicsWorker.EXTRA_ACTION, TopicsWorker.ACTION_LOAD_FROM_NETWORK)
                 .putInt(TopicsWorker.EXTRA_FORUM_ID, forum_id)
@@ -129,7 +127,7 @@ public class ForumViewModel extends AndroidViewModel {
         return WorkManager.getInstance(getApplication()).getWorkInfoByIdLiveData(simpleRequest.getId());
     }
 
-    public PagedList<Topic> emptyTopicPagedList(){
+    PagedList<Topic> emptyTopicPagedList(){
         PositionalDataSource<Topic> dataSource = new PositionalDataSource<Topic>() {
 
             @Override
@@ -155,7 +153,7 @@ public class ForumViewModel extends AndroidViewModel {
                 .build();
     }
 
-    public PagedList<Post> emptyPostPagedList(){
+    PagedList<Post> emptyPostPagedList(){
         PositionalDataSource<Post> dataSource = new PositionalDataSource<Post>() {
 
             @Override
@@ -187,7 +185,7 @@ public class ForumViewModel extends AndroidViewModel {
     }
     */
 
-    public LiveData<PagedList<Post>> getPosts(final int forum_id, final int topic_id){
+    LiveData<PagedList<Post>> getPosts(final int forum_id, final int topic_id){
         //return database.postDao().dataSource(forum_id,topic_id);
         LiveData<PagedList<Post>> pagedListLiveData;
 
@@ -213,7 +211,7 @@ public class ForumViewModel extends AndroidViewModel {
 
     }
 
-    public LiveData<WorkInfo> loadPosts(int forum_id, int topic_id, int page_id){
+    LiveData<WorkInfo> loadPosts(int forum_id, int topic_id, int page_id){
         Data data = new Data.Builder()
                 .putInt(PostsWorker.EXTRA_ACTION, PostsWorker.ACTION_LOAD_FROM_NETWORK)
                 .putInt(PostsWorker.EXTRA_FORUM_ID, forum_id)
@@ -226,20 +224,15 @@ public class ForumViewModel extends AndroidViewModel {
         return WorkManager.getInstance(getApplication()).getWorkInfoByIdLiveData(simpleRequest.getId());
     }
 
-    public LiveData<Integer> getTopicPagesCount(int forum_id, int topic_id){
-        return database.topicDao().getPagesCount(forum_id,topic_id);
-    }
-
-
-    public LiveData<Topic> getTopicLive(int forum_id, int topic_id){
+    LiveData<Topic> getTopicLive(int forum_id, int topic_id){
         return database.topicDao().getTopicLive(forum_id,topic_id);
     }
 
-    public LiveData<User> getUser(String userNick){
+    LiveData<User> getUser(String userNick){
         return database.userDao().getUserLive(userNick);
     }
 
-    public void checkTopicBookmark(Topic topic) {
+    void checkTopicBookmark(Topic topic) {
         Data data = new Data.Builder()
                 .putInt(TopicsWorker.EXTRA_ACTION, TopicsWorker.ACTION_CHANGE_BOOKMARK)
                 .putInt(TopicsWorker.EXTRA_FORUM_ID, topic.forum_id)
@@ -251,7 +244,7 @@ public class ForumViewModel extends AndroidViewModel {
         WorkManager.getInstance(application).beginUniqueWork("checkTopicBookmark", ExistingWorkPolicy.REPLACE,simpleRequest).enqueue();
     }
 
-    public void checkForumBookmark(Forum forum) {
+    void checkForumBookmark(Forum forum) {
         Data data = new Data.Builder()
                 .putInt(ForumsWorker.EXTRA_ACTION, ForumsWorker.ACTION_CHANGE_BOOKMARK)
                 .putInt(ForumsWorker.EXTRA_FORUM_ID, forum.id)
@@ -262,7 +255,7 @@ public class ForumViewModel extends AndroidViewModel {
         WorkManager.getInstance(application).beginUniqueWork("checkForumBookmark", ExistingWorkPolicy.REPLACE,simpleRequest).enqueue();
     }
 
-    public void loginSite(String login, String password, final NetworkListener loginListener){
+    void loginSite(String login, String password, final NetworkListener loginListener){
         //пробуем залогиниться
         App.getPostApi().login("login",login,password).enqueue(new Callback<ResponseBody>() {
             @Override
@@ -320,7 +313,7 @@ public class ForumViewModel extends AndroidViewModel {
             }
 
             @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
+            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
                 if (loginListener!=null)
                     loginListener.onError(t.getMessage());
 
@@ -339,16 +332,16 @@ public class ForumViewModel extends AndroidViewModel {
 
     }
 
-    public void logOut(){
+    void logOut(){
         ((App)getApplication()).clearCookies();
         privIsLogin.setValue(((App)getApplication()).isLogin());
     }
 
 
-    public void votePost(final Post post, VoteType voteType, final NetworkListener voteListener){
+    void votePost(final Post post, VoteType voteType, final NetworkListener voteListener){
         App.getPostApi().vote(String.valueOf(post.forum_id),String.valueOf(post.topic_id),String.valueOf(post.id),voteType.name()).enqueue(new Callback<VoteResponse>() {
             @Override
-            public void onResponse(Call<VoteResponse> call, Response<VoteResponse> response) {
+            public void onResponse(@NonNull Call<VoteResponse> call, @NonNull Response<VoteResponse> response) {
                 if (response.isSuccessful()){
                     final VoteResponse voteResponse=response.body();
                     if (voteResponse!=null){
@@ -374,17 +367,17 @@ public class ForumViewModel extends AndroidViewModel {
             }
 
             @Override
-            public void onFailure(Call<VoteResponse> call, Throwable t) {
+            public void onFailure(@NonNull Call<VoteResponse> call, @NonNull Throwable t) {
                 if (voteListener!=null)
                     voteListener.onError(t.getMessage());
             }
         });
     }
 
-    public void sendPost(final int forum_id, final int topic_id, final int post_id, String subject, String body, final NetworkListener postListener) {
+    void sendPost(final int forum_id, final int topic_id, final int post_id, String subject, String body, final NetworkListener postListener) {
         App.getPostApi().post(String.valueOf(forum_id),String.valueOf(topic_id),String.valueOf(post_id),subject,body,"Y").enqueue(new Callback<ResponseBody>() {
             @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
                     try {
                         StringBuilder text=readStream(response.body().byteStream(),"utf-8");
@@ -417,18 +410,18 @@ public class ForumViewModel extends AndroidViewModel {
             }
 
             @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
+            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
                 if (postListener!=null)
                     postListener.onError(t.getMessage());
             }
         });
     }
 
-    public void sendModerator(int forum_id,int post_id, final NetworkListener postListener){
+    void sendModerator(int forum_id,int post_id, final NetworkListener postListener){
         //https://www.e1.ru/talk/forum/moderator.php?f=22&m=64253&mobile=1
         App.getPostApi().sendModerator(forum_id,post_id).enqueue(new Callback<ResponseBody>() {
             @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
                     try {
                         StringBuilder text=readStream(response.body().byteStream(),"windows-1251");
@@ -448,77 +441,121 @@ public class ForumViewModel extends AndroidViewModel {
             }
 
             @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
+            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
                 if (postListener!=null)
                     postListener.onError(t.getMessage());
             }
         });
     }
 
-    public void sendLK(String user_id, final String theme, final String body, final NetworkListener postListener){
+    void sendLK(String user_id, final String theme, final String body, final NetworkListener postListener){
         App.getPostApi().prepareLK(user_id).enqueue(new Callback<ResponseBody>() {
             @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                try {
-                    final StringBuilder text=readStream(response.body().byteStream(),"windows-1251");
-                    HashMap<String, String> values= SiteParser.extractFormValues(text.toString());
+            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    try {
+                        final StringBuilder text = readStream(response.body().byteStream(), "windows-1251");
+                        HashMap<String, String> values = SiteParser.extractFormValues(text.toString());
 
-                    if (values.size()==0) {
-                        if (postListener!=null)
-                            postListener.onError(getString(R.string.send_private_error));
-                        return;
-                    }
+                        if (values.size() == 0) {
+                            if (postListener != null)
+                                postListener.onError(getString(R.string.send_private_error));
+                            return;
+                        }
 
-                    App.getPostApi().sendLK(
-                            "1",
-                            values.get("type_message"),
-                            values.get("type_message_checksum"),
-                            values.get("type_send"),
-                            values.get("type_send_checksum"),
-                            values.get("service_id"),
-                            values.get("service_id_checksum"),
-                            values.get("sender"),
-                            values.get("sender_checksum"),
-                            values.get("recipient"),
-                            values.get("recipient_checksum"),
-                            values.get("dialog_id"),
-                            values.get("dialog_id_checksum"),
-                            values.get("protected_list"),
-                            values.get("protected_list_checksum"),
-                            theme,
-                            body,
-                            SiteParser.URLEncodeString("Отправить")
-                            ).enqueue(new Callback<ResponseBody>() {
-                        @Override
-                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                            try {
-                                StringBuilder result = readStream(response.body().byteStream(),"windows-1251");
-                                if (result.toString().contains("Ваше сообщение отправлено")){
-                                    if (postListener!=null)
-                                        postListener.onSuccess("");
-                                } else {
-                                    if (postListener!=null)
-                                        postListener.onError(text.toString());
+                        App.getPostApi().sendLK(
+                                "1",
+                                values.get("type_message"),
+                                values.get("type_message_checksum"),
+                                values.get("type_send"),
+                                values.get("type_send_checksum"),
+                                values.get("service_id"),
+                                values.get("service_id_checksum"),
+                                values.get("sender"),
+                                values.get("sender_checksum"),
+                                values.get("recipient"),
+                                values.get("recipient_checksum"),
+                                values.get("dialog_id"),
+                                values.get("dialog_id_checksum"),
+                                values.get("protected_list"),
+                                values.get("protected_list_checksum"),
+                                theme,
+                                body,
+                                SiteParser.URLEncodeString("Отправить")
+                        ).enqueue(new Callback<ResponseBody>() {
+                            @Override
+                            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                                try {
+                                    StringBuilder result = readStream(response.body().byteStream(), "windows-1251");
+                                    if (result.toString().contains("Ваше сообщение отправлено")) {
+                                        if (postListener != null)
+                                            postListener.onSuccess("");
+                                    } else {
+                                        if (postListener != null)
+                                            postListener.onError(text.toString());
+                                    }
+                                } catch (IOException e) {
+                                    if (postListener != null)
+                                        postListener.onError(e.getMessage());
                                 }
-                            } catch (IOException e) {
-                                if (postListener!=null)
-                                    postListener.onError(e.getMessage());
                             }
-                        }
 
-                        @Override
-                        public void onFailure(Call<ResponseBody> call, Throwable t) {
-                            if (postListener!=null)
-                                postListener.onError(t.getMessage());
-                        }
-                    });
-                } catch (IOException e) {
-                    e.printStackTrace();
+                            @Override
+                            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                if (postListener != null)
+                                    postListener.onError(t.getMessage());
+                            }
+                        });
+                    } catch (IOException e) {
+                        if (postListener!=null)
+                            postListener.onError(e.getMessage());
+                    }
                 }
             }
 
             @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
+            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                if (postListener!=null)
+                    postListener.onError(t.getMessage());
+            }
+        });
+    }
+
+    void aboutUser(int user_id, final NetworkListener postListener){
+        App.getPostApi().aboutUser(user_id).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    try {
+                        StringBuilder text = readStream(response.body().byteStream(), "windows-1251");
+                        HashMap<String, String> values = SiteParser.extractTableValues(text.toString());
+                        if (values.size()==0){
+                            if (postListener != null)
+                                postListener.onError(getString(R.string.about_user_error));
+                            return;
+                        }
+
+                        if (postListener != null){
+                            StringBuilder result = new StringBuilder();
+
+                            Iterator iterator = values.entrySet().iterator();
+                            while (iterator.hasNext()) {
+                                Map.Entry item = (Map.Entry) iterator.next();
+                                result.append("\n").append(String.format("%s: %s",item.getKey(), item.getValue()));
+                                iterator.remove();
+                            }
+
+                            postListener.onSuccess(result.toString());
+                        }
+                    } catch (IOException e) {
+                        if (postListener != null)
+                            postListener.onError(e.getMessage());
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
                 if (postListener!=null)
                     postListener.onError(t.getMessage());
             }

@@ -200,7 +200,7 @@ public class SiteParser {
 
                     try {
                         Uri uri = Uri.parse(userLink);
-                        user.idForum = Integer.parseInt(uri.getQueryParameter("user"));
+                        user.user_id = Integer.parseInt(uri.getQueryParameter("user"));
                     } catch (Exception e){
                     }
 
@@ -220,7 +220,7 @@ public class SiteParser {
                     parserListener.onParse(user, ParseStatus.INPROCESS);
 
                     //post.user=userNick;
-                    //if (user.idForum>0)
+                    //if (user.user_id>0)
                         //post.user=String.format(Locale.ENGLISH,"<b><a href=\"%s\">%s</a></b>","user:".concat(userNick),userNick);
                     //else
                         post.user=String.format(Locale.ENGLISH,"<a href=\"%s\">%s</a>","user:".concat(userNick),userNick);
@@ -313,6 +313,27 @@ public class SiteParser {
             String key = inputElement.attr("name");
             String value = inputElement.attr("value");
             result.put(key,value);
+        }
+        return result;
+    }
+
+    public static HashMap<String, String> extractTableValues(String html){
+        HashMap<String, String> result= new HashMap<>();
+
+        Document document = Jsoup.parse(html);
+
+        Element table = document.select("table").first();
+        if (table==null) return result;
+
+        for (Element row : table.select("tr")) {
+            Elements tds = row.select("td");
+
+            if (tds.size() == 2) {
+                String key = tds.get(0).text();
+                String value = tds.get(1).text();
+                result.put(key,value);
+            }
+
         }
         return result;
     }

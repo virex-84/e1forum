@@ -12,7 +12,7 @@ public class User {
     @PrimaryKey(autoGenerate = true)
     public int id;
 
-    public int idForum;
+    public int user_id;
 
     @ColumnInfo(collate = ColumnInfo.UNICODE)
     public String nick;
