@@ -6,6 +6,9 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Entity
 public class User {
     //autoGenerate = true обязательно иначе пользователь не сохранится в базе
@@ -26,6 +29,8 @@ public class User {
 
     @ColumnInfo(typeAffinity = ColumnInfo.BLOB)
     public byte[] avatarIMG;
+
+    public Map<String, String> info=new HashMap<>();
 
     //сравнение для адаптера PagedList (recucleview)
     public static final DiffUtil.ItemCallback<User> DIFF_CALLBACK = new DiffUtil.ItemCallback<User>(){

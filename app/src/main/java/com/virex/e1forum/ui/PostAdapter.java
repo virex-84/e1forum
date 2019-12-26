@@ -6,7 +6,9 @@ import android.text.Editable;
 import android.text.Html;
 import android.text.Layout;
 import android.text.Spannable;
+import android.text.SpannableStringBuilder;
 import android.text.Spanned;
+import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ImageSpan;
 import android.text.style.QuoteSpan;
@@ -29,6 +31,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.virex.e1forum.R;
 import com.virex.e1forum.common.GlideApp;
+import com.virex.e1forum.common.Utils;
 import com.virex.e1forum.db.entity.Post;
 import com.virex.e1forum.network.VoteType;
 
@@ -45,11 +48,15 @@ public class PostAdapter extends PagedListAdapter<Post, RecyclerView.ViewHolder>
     private static final int ITEM = 1;
     private static final int EMPTY = 2;
 
-    private int spanColor=0;
     private Resources resources;
 
     private LinkMovementMethod linkMovementMethod;
     private PostListener postListener;
+
+    private String filter;
+    private int spanColor=0;
+    private int foregroundColor =-1;
+    private int backgroundColor =-1;
 
     public interface PostListener {
         void onLinkClick(String link);
@@ -61,11 +68,10 @@ public class PostAdapter extends PagedListAdapter<Post, RecyclerView.ViewHolder>
         void onModeratorClick(Post post);
     }
 
-    public PostAdapter(@NonNull DiffUtil.ItemCallback<Post> diffCallback, PostListener postListener, int spanColor, Resources resources) {
+    public PostAdapter(@NonNull DiffUtil.ItemCallback<Post> diffCallback, PostListener postListener, Resources resources) {
         super(diffCallback);
         this.postListener =postListener;
 
-        this.spanColor=spanColor;
         this.resources=resources;
 
         //отрабатываем нажатие на ссылки
@@ -112,6 +118,12 @@ public class PostAdapter extends PagedListAdapter<Post, RecyclerView.ViewHolder>
         };
     }
 
+    public void setColors(int spanColor, int foregroundColor, int backgroundColor) {
+        this.spanColor=spanColor;
+        this.foregroundColor=foregroundColor;
+        this.backgroundColor=backgroundColor;
+    }
+
     public void setIsReadOnly(boolean isReadOnly){
         this.isReadOnly=isReadOnly;
         this.notifyDataSetChanged();
@@ -152,12 +164,9 @@ public class PostAdapter extends PagedListAdapter<Post, RecyclerView.ViewHolder>
                 final Post post = getItem(position);
                 final PostHolder postHolder=((PostHolder)holder);
 
-                //ник
-                postHolder.tv_user.setText(HtmlCompat.fromHtml(post.user,HtmlCompat.FROM_HTML_MODE_COMPACT));
-
-                //преобразуем текст из html в удобочитаемый вариант
-                //postHolder.tv_text.setText(HtmlCompat.fromHtml(post.text,HtmlCompat.FROM_HTML_MODE_COMPACT));
-                Spanned text=HtmlCompat.fromHtml(post.text, HtmlCompat.FROM_HTML_MODE_LEGACY,new GlideImageGetter(resources,postHolder.tv_text), new Html.TagHandler() {
+                String userLink=String.format(Locale.ENGLISH,"<a href=\"%s\">%s</a>","user:".concat(post.user),post.user);
+                SpannableStringBuilder user=(SpannableStringBuilder)HtmlCompat.fromHtml(userLink,HtmlCompat.FROM_HTML_MODE_COMPACT);
+                SpannableStringBuilder text=(SpannableStringBuilder)HtmlCompat.fromHtml(post.text, HtmlCompat.FROM_HTML_MODE_LEGACY,new GlideImageGetter(resources,postHolder.tv_text), new Html.TagHandler() {
                     @Override
                     public void handleTag(boolean opening, String tag, Editable editable, XMLReader xmlReader) {
                         if (opening) {
@@ -166,22 +175,30 @@ public class PostAdapter extends PagedListAdapter<Post, RecyclerView.ViewHolder>
                                 editable.append("Цитата:\n");
                             }
                         } else {
-                                //переделываем все "цитаты" на свой компонент
-                                QuoteSpan[] quoteSpans = editable.getSpans(0, editable.length(), QuoteSpan.class);
-                                for (QuoteSpan quoteSpan : quoteSpans) {
-                                    int start = editable.getSpanStart(quoteSpan);
-                                    int end = editable.getSpanEnd(quoteSpan);
-                                    int flags = editable.getSpanFlags(quoteSpan);
-                                    editable.removeSpan(quoteSpan);
-                                    MyQuoteSpan qs=new MyQuoteSpan(spanColor,20,40);
+                            //переделываем все "цитаты" на свой компонент
+                            QuoteSpan[] quoteSpans = editable.getSpans(0, editable.length(), QuoteSpan.class);
+                            for (QuoteSpan quoteSpan : quoteSpans) {
+                                int start = editable.getSpanStart(quoteSpan);
+                                int end = editable.getSpanEnd(quoteSpan);
+                                int flags = editable.getSpanFlags(quoteSpan);
+                                editable.removeSpan(quoteSpan);
+                                MyQuoteSpan qs=new MyQuoteSpan(spanColor,20,40);
 
-                                    editable.setSpan(qs,start,end,flags);
-                                }
+                                editable.setSpan(qs,start,end,flags);
+                            }
                         }
                     }
                 });
 
+                if (!TextUtils.isEmpty(filter)) {
+                    user=Utils.makeSpanText(holder.itemView.getContext(),user,filter,foregroundColor,backgroundColor);
+
+                    text=Utils.makeSpanText(holder.itemView.getContext(),text,filter,foregroundColor,backgroundColor);
+                }
+
+                postHolder.tv_user.setText(user);
                 postHolder.tv_text.setText(text);
+
                 postHolder.tv_date.setText(getDate(post.lastmod));
                 postHolder.tv_carma_plus.setText(String.valueOf(post.carmaPlus));
                 postHolder.tv_carma_minus.setText(String.valueOf(post.carmaMinus));
@@ -364,5 +381,9 @@ public class PostAdapter extends PagedListAdapter<Post, RecyclerView.ViewHolder>
                 text.setSpan(replace, where, len, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
         }
+    }
+
+    public void markText(String filter) {
+        this.filter=filter;
     }
 }

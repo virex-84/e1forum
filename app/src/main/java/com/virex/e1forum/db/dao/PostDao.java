@@ -35,7 +35,20 @@ public interface PostDao {
     @Query("SELECT * FROM post WHERE forum_id=:forum_id AND topic_id=:topic_id ORDER BY lastmod asc")
     DataSource.Factory<Integer, Post> dataSourcePagedList(int forum_id, int topic_id);
 
-    @Query("SELECT COUNT(id) FROM post WHERE forum_id=:forum_id AND topic_id=:topic_id")
+    //рабочее fts
+    //@Query("SELECT * FROM post WHERE (forum_id=:forum_id AND topic_id=:topic_id) AND (post MATCH 'user:*'||:filter||'*' OR post MATCH 'text:*'||:filter||'*') ORDER BY lastmod asc")
+    //DataSource.Factory<Integer, Post> dataSourcePagedList(int forum_id, int topic_id, String filter);
+
+    //userSearch,textSearch и filter должны быть LOWER
+    @Query("SELECT * FROM post WHERE (forum_id=:forum_id AND topic_id=:topic_id) AND ((userSearch LIKE '%'||:filter||'%') OR (textSearch LIKE '%'||:filter||'%')) ORDER BY lastmod asc")
+    DataSource.Factory<Integer, Post> dataSourcePagedList(int forum_id, int topic_id, String filter);
+
+    //@RawQuery(observedEntities = Post.class)
+    //DataSource.Factory<Integer, Post>dataSourcePagedListRaw(SupportSQLiteQuery query);
+
+    @Query("SELECT COUNT(*) FROM post WHERE forum_id=:forum_id AND topic_id=:topic_id")
     int getCount(int forum_id, int topic_id);
 
+    @Query("SELECT * FROM post WHERE id=:post_id")
+    Post get(int post_id);
 }

@@ -31,8 +31,17 @@ public interface UserDao {
     //LiveData<User> getUser(String nick);
     User getUser(String nick);
 
+    //@Query("SELECT * FROM user WHERE nick LIKE '%' || :nick || '%' COLLATE UNICODE")
+    @Query("SELECT * FROM user WHERE user_id LIKE :user_id")
+    //LiveData<User> getUser(String nick);
+    User getUser(int user_id);
+
     @Query("SELECT * FROM user WHERE nick LIKE :nick")
     LiveData<User> getUserLive(String nick);
+
+    @Query("SELECT * FROM user WHERE user_id LIKE :user_id")
+        //LiveData<User> getUser(String nick);
+    LiveData<User> getUserLive(int user_id);
 
     @Query("SELECT * FROM user")
     LiveData<User> getUsers();

@@ -23,7 +23,9 @@ public class Topic {
     public int forum_id;
 
     public String title;
+    public String titleSearch;//для поиска lower
     public String userName;
+    public String userSearch;//для поиска lower
     public String lastComment;
     public String comments;
     public boolean isClosed=false;

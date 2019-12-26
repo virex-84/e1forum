@@ -1,14 +1,21 @@
 package com.virex.e1forum;
 
+import android.app.SearchManager;
 import android.content.Context;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.SearchView;
+import androidx.core.view.MenuItemCompat;
 import androidx.lifecycle.Observer;
 import androidx.paging.PagedList;
 import androidx.recyclerview.widget.DefaultItemAnimator;
@@ -30,7 +37,7 @@ import static com.virex.e1forum.repository.TopicsWorker.TOPICS_MESSAGE;
 /**
  * Фрагмент списка тем
  */
-public class TopicFragment extends BaseFragment {
+public class TopicFragment extends BaseFragment implements SearchView.OnQueryTextListener {
 
     private int forum_id=0;
 
@@ -41,6 +48,11 @@ public class TopicFragment extends BaseFragment {
     private TopicAdapter topicAdapter;
     private ForumViewModel forumViewModel;
     private FloatingActionButton fab;
+
+    private static final String SEARCH_TEXT="SEARCH_TEXT";
+    private String retainedSearchString;
+    private SearchView searchView;
+    private String filter="";
 
     private PostDialog postDialog;
 
@@ -56,6 +68,9 @@ public class TopicFragment extends BaseFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        //создаем меню
+        setHasOptionsMenu(true);
 
         forumViewModel = getDefaultViewModelProviderFactory().create(ForumViewModel.class);
         forum_id = getArguments() != null ? getArguments().getInt(FORUM_ID) : 0;
@@ -84,6 +99,7 @@ public class TopicFragment extends BaseFragment {
                 forumViewModel.checkTopicBookmark(topic);
             }
         });
+        topicAdapter.setColors(getResources().getColor(R.color.white),getResources().getColor(R.color.colorPrimary));
 
         RecyclerView recyclerView = view.findViewById(R.id.recyclerView);
         recyclerView.setHasFixedSize(true);
@@ -157,7 +173,7 @@ public class TopicFragment extends BaseFragment {
             }
         });
 
-        forumViewModel.getTopics(forum_id).observe(this.getViewLifecycleOwner(), new Observer<PagedList<Topic>>() {
+        forumViewModel.getTopics(forum_id,filter).observe(this.getViewLifecycleOwner(), new Observer<PagedList<Topic>>() {
             @Override
             public void onChanged(PagedList<Topic> topics) {
                 if (topics.size()==0)
@@ -177,6 +193,10 @@ public class TopicFragment extends BaseFragment {
             }
         });
 
+        if (savedInstanceState != null) {
+            retainedSearchString =savedInstanceState.getString(SEARCH_TEXT, null);
+        }
+
         return view;
     }
 
@@ -184,5 +204,58 @@ public class TopicFragment extends BaseFragment {
     public void onPause() {
         super.onPause();
         savePosition(linearLayoutManager,SHARED_OPTIONS);
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        if (searchView!=null) {
+            outState.putString(SEARCH_TEXT, searchView.getQuery().toString());
+        }
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        menu.clear();
+        inflater.inflate(R.menu.search, menu);
+
+        //ассоциируем настройку поиска с SearchView
+        //!без этой строки иконка поиска будет добавлятся при каждом переключении на фрагмент
+        SearchManager searchManager = (SearchManager) mainactivity.getSystemService(Context.SEARCH_SERVICE);
+
+        MenuItem item = menu.findItem(R.id.search);
+        searchView = new SearchView((mainactivity).getSupportActionBar().getThemedContext());
+        MenuItemCompat.setActionView(item, searchView);
+        searchView.setOnQueryTextListener(this);
+
+        //раскрываем меню
+        searchView.onActionViewExpanded();
+        searchView.setFocusable(true);
+        searchView.requestFocusFromTouch();
+
+        if (!TextUtils.isEmpty(retainedSearchString)) {
+            item.expandActionView();
+            searchView.setQuery(retainedSearchString, true);
+            searchView.clearFocus();
+        }
+
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+        filter=newText;
+        savePosition(linearLayoutManager,SHARED_OPTIONS);
+        forumViewModel.setFilteredTopics(forum_id,filter);
+        //помечаем фильтр для выделения текста в адаптере
+        topicAdapter.markText(filter);
+        //принудительная перерисовка recycleview
+        topicAdapter.notifyDataSetChanged();
+        return false;
     }
 }

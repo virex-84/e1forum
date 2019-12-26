@@ -3,28 +3,52 @@ package com.virex.e1forum.db.entity;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
+import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
+
 /**
  * Описание таблицы Форум
  */
-@Entity(foreignKeys = @ForeignKey(entity = Topic.class,
+@Entity(tableName = "Post",
+        foreignKeys = @ForeignKey(entity = Topic.class,
         parentColumns = "id",
         childColumns = "topic_id"),
-        indices = {@Index("topic_id")})
+        indices = {@Index("topic_id")
+        }
+)
+//@Fts4(contentEntity = Post.class)
+//@Fts4(tokenizer = FtsOptions.TOKENIZER_UNICODE61)
+//@Fts4
 public class Post {
     @PrimaryKey(autoGenerate = true)
     public int id;
 
+
+    /*
+    //для fts
+    //@ColumnInfo()
+    //public int id;
+
+    //@PrimaryKey
+    //@Ignore
+    //public int rowid;
+     */
+
     public int forum_id;
     public int topic_id;
 
+    @ColumnInfo(collate = ColumnInfo.UNICODE)
     public String user;
+    public String userSearch; //для поиска lower
+
     public String userAvatarURL;
-    //public long time;
+
+    @ColumnInfo(collate = ColumnInfo.UNICODE)
     public String text;
+    public String textSearch;//для поиска lower
 
     public int carmaPlus;
     public int carmaMinus;

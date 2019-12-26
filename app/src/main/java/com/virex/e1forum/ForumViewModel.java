@@ -4,9 +4,12 @@ import android.app.Application;
 import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 import androidx.paging.LivePagedListBuilder;
 import androidx.paging.PagedList;
 import androidx.paging.PositionalDataSource;
@@ -34,7 +37,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -47,6 +49,14 @@ import retrofit2.Response;
 public class ForumViewModel extends AndroidViewModel {
 
     private MutableLiveData<Boolean> privIsLogin = new MutableLiveData<>(false);
+
+    //фильтрованный список топиков
+    private MediatorLiveData<PagedList<Topic>> filteredTopics=new MediatorLiveData<>();
+    private LiveData<PagedList<Topic>> topics;
+
+    //фильтрованный список постов
+    private MediatorLiveData<PagedList<Post>> filteredPosts=new MediatorLiveData<>();
+    private LiveData<PagedList<Post>> posts;
 
     public interface NetworkListener {
         void onSuccess(String message);
@@ -85,12 +95,13 @@ public class ForumViewModel extends AndroidViewModel {
         return WorkManager.getInstance(getApplication()).getWorkInfoByIdLiveData(simpleRequest.getId());
     }
 
+    /*
     LiveData<PagedList<Topic>> getTopics(final int forum_id){
         //return database.topicDao().dataSource(forum_id);
         LiveData<PagedList<Topic>> pagedListLiveData;
 
         PagedList.Config config = new PagedList.Config.Builder()
-                .setEnablePlaceholders(true)
+                .setEnablePlaceholders(false)
                 .setPageSize(10)
                 .build();
 
@@ -110,6 +121,59 @@ public class ForumViewModel extends AndroidViewModel {
         return  pagedListLiveData;
 
     }
+     */
+    private LiveData<PagedList<Topic>> createFilteredTopic(final int forum_id, String filter){
+        filter=filter.toLowerCase();
+        LiveData<PagedList<Topic>> pagedListLiveData;
+
+        PagedList.Config config = new PagedList.Config.Builder()
+                .setEnablePlaceholders(true)
+                .setPageSize(10)
+                //.setInitialLoadSizeHint(initial)
+                .build();
+
+        if (TextUtils.isEmpty(filter)){
+            pagedListLiveData = new LivePagedListBuilder<>(database.topicDao().dataSourcePagedList(forum_id),config)
+                    .setInitialLoadKey(1)
+                    .setFetchExecutor(Executors.newSingleThreadExecutor())
+                    .setBoundaryCallback(new PagedList.BoundaryCallback<Topic>() {
+                        @Override
+                        public void onZeroItemsLoaded() {
+                            super.onZeroItemsLoaded();
+                            //база пустая и фильтр не установлен
+                            loadTopics(forum_id, 0);
+                        }
+                    })
+                    .build();
+        } else {
+            pagedListLiveData = new LivePagedListBuilder<>(database.topicDao().dataSourcePagedList(forum_id, filter), config)
+                    .setFetchExecutor(Executors.newSingleThreadExecutor())
+                    .build();
+        }
+
+        return  pagedListLiveData;
+    }
+
+    //при установке фильтра - "переподписываемся" к новым данным
+    void setFilteredTopics(int forum_id, final String filter){
+
+        filteredTopics.removeSource(topics);
+        topics=createFilteredTopic(forum_id, filter);
+
+        filteredTopics.addSource(topics, new Observer<PagedList<Topic>>() {
+            @Override
+            public void onChanged(@Nullable PagedList<Topic> topics) {
+                filteredTopics.setValue(topics);
+            }
+        });
+    }
+
+    LiveData<PagedList<Topic>> getTopics(int forum_id, String filter) {
+        setFilteredTopics(forum_id, filter);
+        return filteredTopics;
+    }
+
+
 
     LiveData<Integer> getTopicsCount(int forum_id, boolean isAttathed){
         return  database.topicDao().getCount(forum_id,isAttathed);
@@ -180,11 +244,6 @@ public class ForumViewModel extends AndroidViewModel {
     }
 
     /*
-    public LiveData<List<Post>> getPosts(int forum_id, int topic_id){
-        return database.postDao().dataSource(forum_id,topic_id);
-    }
-    */
-
     LiveData<PagedList<Post>> getPosts(final int forum_id, final int topic_id){
         //return database.postDao().dataSource(forum_id,topic_id);
         LiveData<PagedList<Post>> pagedListLiveData;
@@ -208,7 +267,61 @@ public class ForumViewModel extends AndroidViewModel {
                 .build();
 
         return  pagedListLiveData;
+    }
+     */
+    private LiveData<PagedList<Post>> createFilteredPost(final int forum_id, final int topic_id, String filter){
+        filter=filter.toLowerCase();
+        LiveData<PagedList<Post>> pagedListLiveData;
 
+        PagedList.Config config = new PagedList.Config.Builder()
+                .setEnablePlaceholders(true)
+                .setPageSize(10)
+                //.setInitialLoadSizeHint(initial)
+                .build();
+
+        //SimpleSQLiteQuery query= new SimpleSQLiteQuery(String.format(Locale.ENGLISH,"SELECT * FROM post WHERE (forum_id=%d AND topic_id=%d) AND ((user LIKE '%%%s%%') OR (text LIKE '%%%s%%')) ORDER BY lastmod asc",forum_id,topic_id,filter,filter));
+        //SimpleSQLiteQuery query= new SimpleSQLiteQuery(String.format(Locale.ENGLISH,"SELECT * FROM post WHERE (forum_id=%d AND topic_id=%d) AND ((user GLOB '[^a-zA-Z0-9_]%s[^a-zA-Z0-9_]') OR (text GLOB '[^a-zA-Z0-9_]%s[^a-zA-Z0-9_]')) ORDER BY lastmod asc",forum_id,topic_id,filter,filter));
+        //SimpleSQLiteQuery query= new SimpleSQLiteQuery(String.format(Locale.ENGLISH,"SELECT * FROM post WHERE (forum_id=%d AND topic_id=%d) AND (text LIKE '%%%s%%' ) ORDER BY lastmod asc",forum_id,topic_id,filter,filter));
+
+        if (TextUtils.isEmpty(filter)){
+            pagedListLiveData = new LivePagedListBuilder<>(database.postDao().dataSourcePagedList(forum_id,topic_id),config)
+                    //pagedListLiveData = new LivePagedListBuilder<>(database.postDao().dataSourcePagedListRaw(query),config)
+                    .setFetchExecutor(Executors.newSingleThreadExecutor())
+                    .setBoundaryCallback(new PagedList.BoundaryCallback<Post>() {
+                        @Override
+                        public void onZeroItemsLoaded() {
+                            super.onZeroItemsLoaded();
+                            //база пустая и фильтр не установлен
+                            loadPosts(forum_id, topic_id, 0);
+                        }
+                    })
+                    .build();
+        } else {
+            pagedListLiveData = new LivePagedListBuilder<>(database.postDao().dataSourcePagedList(forum_id, topic_id, filter), config)
+                    .setFetchExecutor(Executors.newSingleThreadExecutor())
+                    .build();
+        }
+
+        return  pagedListLiveData;
+    }
+
+    //при установке фильтра - "переподписываемся" к новым данным
+    void setFilteredPosts(int forum_id, int topic_id, final String filter){
+
+        filteredPosts.removeSource(posts);
+        posts=createFilteredPost(forum_id, topic_id, filter);
+
+        filteredPosts.addSource(posts, new Observer<PagedList<Post>>() {
+            @Override
+            public void onChanged(@Nullable PagedList<Post> posts) {
+                filteredPosts.setValue(posts);
+            }
+        });
+    }
+
+    LiveData<PagedList<Post>> getPosts(int forum_id, int topic_id, String filter) {
+        setFilteredPosts(forum_id, topic_id, filter);
+        return filteredPosts;
     }
 
     LiveData<WorkInfo> loadPosts(int forum_id, int topic_id, int page_id){
@@ -521,34 +634,20 @@ public class ForumViewModel extends AndroidViewModel {
         });
     }
 
-    void aboutUser(int user_id, final NetworkListener postListener){
-        App.getPostApi().aboutUser(user_id).enqueue(new Callback<ResponseBody>() {
+    void sendMail(String user_id, final String theme, final String body, final NetworkListener postListener) {
+        App.getPostApi().prepareMail(user_id).enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
                     try {
-                        StringBuilder text = readStream(response.body().byteStream(), "windows-1251");
-                        HashMap<String, String> values = SiteParser.extractTableValues(text.toString());
-                        if (values.size()==0){
-                            if (postListener != null)
-                                postListener.onError(getString(R.string.about_user_error));
-                            return;
-                        }
+                        final StringBuilder text = readStream(response.body().byteStream(), "windows-1251");
+                        HashMap<String, String> values = SiteParser.extractFormValues(text.toString());
+                        values.put("subject",theme);
+                        values.put("text",body);
+                        values.put("save",SiteParser.URLEncodeString("Отправить"));
 
-                        if (postListener != null){
-                            StringBuilder result = new StringBuilder();
-
-                            Iterator iterator = values.entrySet().iterator();
-                            while (iterator.hasNext()) {
-                                Map.Entry item = (Map.Entry) iterator.next();
-                                result.append("\n").append(String.format("%s: %s",item.getKey(), item.getValue()));
-                                iterator.remove();
-                            }
-
-                            postListener.onSuccess(result.toString());
-                        }
                     } catch (IOException e) {
-                        if (postListener != null)
+                        if (postListener!=null)
                             postListener.onError(e.getMessage());
                     }
                 }
@@ -558,6 +657,55 @@ public class ForumViewModel extends AndroidViewModel {
             public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
                 if (postListener!=null)
                     postListener.onError(t.getMessage());
+            }
+        });
+    }
+
+    void aboutUser(final int user_id, final NetworkListener networkListener){
+        App.getPostApi().aboutUser(user_id).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    try {
+                        StringBuilder text = readStream(response.body().byteStream(), "windows-1251");
+                        final HashMap<String, String> values = SiteParser.extractTableValues(text.toString());
+                        if (values.size()==0){
+                            if (networkListener != null)
+                                networkListener.onError(getString(R.string.about_user_error));
+                            return;
+                        } else {
+                            StringBuilder result = new StringBuilder();
+                            for (Map.Entry<String, String> item : values.entrySet()) {
+                                result.append("\n").append(String.format("<b>%s</b>: %s<br>",item.getKey(), item.getValue()));
+                            }
+                            //сообщение
+                            if (networkListener != null)
+                                networkListener.onSuccess(result.toString());
+                        }
+
+                        //сохраняем данные о пользователе в базу
+                        Executors.newSingleThreadExecutor().submit(new Runnable() {
+                            @Override
+                            public void run() {
+                                //не затираем все поля а только обновляем нужные
+                                User user=database.userDao().getUser(user_id);
+                                user.info=values;
+                                //сохранение в базу
+                                database.userDao().update(user);
+                            }
+                        });
+
+                    } catch (IOException e) {
+                        if (networkListener != null)
+                            networkListener.onError(e.getMessage());
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                if (networkListener != null)
+                    networkListener.onError(t.getMessage());
             }
         });
     }

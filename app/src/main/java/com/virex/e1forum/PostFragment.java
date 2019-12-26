@@ -1,12 +1,16 @@
 package com.virex.e1forum;
 
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +21,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.PopupMenu;
+import androidx.appcompat.widget.SearchView;
+import androidx.core.text.HtmlCompat;
+import androidx.core.view.MenuItemCompat;
 import androidx.lifecycle.Observer;
 import androidx.paging.PagedList;
 import androidx.recyclerview.widget.DefaultItemAnimator;
@@ -24,7 +31,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.work.WorkInfo;
 
-import com.virex.e1forum.common.LiveDataUtils;
+import com.virex.e1forum.common.Utils;
 import com.virex.e1forum.db.entity.Post;
 import com.virex.e1forum.db.entity.Topic;
 import com.virex.e1forum.db.entity.User;
@@ -44,7 +51,7 @@ import static com.virex.e1forum.repository.PostsWorker.POSTS_MESSAGE;
 /**
  * Фрагмент списка постов
  */
-public class PostFragment extends BaseFragment {
+public class PostFragment extends BaseFragment  implements SearchView.OnQueryTextListener {
 
     private int forum_id=0;
     private int topic_id=0;
@@ -58,6 +65,12 @@ public class PostFragment extends BaseFragment {
     private SwipyRefreshLayout swipeRefreshLayout;
     private PostAdapter postAdapter;
     private ForumViewModel forumViewModel;
+
+
+    private static final String SEARCH_TEXT="SEARCH_TEXT";
+    private String retainedSearchString;
+    private SearchView searchView;
+    private String filter="";
 
     private final int ID_LK=1;
     private final int ID_MAIL=2;
@@ -79,6 +92,9 @@ public class PostFragment extends BaseFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        //создаем меню
+        setHasOptionsMenu(true);
+
         forumViewModel = getDefaultViewModelProviderFactory().create(ForumViewModel.class);
         forum_id = getArguments() != null ? getArguments().getInt(FORUM_ID) : 0;
         topic_id = getArguments() != null ? getArguments().getInt(TOPIC_ID) : 0;
@@ -96,7 +112,7 @@ public class PostFragment extends BaseFragment {
             public void onUserClick(final String userNick, final TextView widget) {
                 //observeOnce - подписываемся один раз на событие и сразу отписываемся
                 //т.к. после обновления страницы onChanged сработает заново и мы получим кучу диалоговых окон
-                LiveDataUtils.observeOnce(forumViewModel.getUser(userNick), PostFragment.this.getViewLifecycleOwner(), new Observer<User>() {
+                Utils.observeOnce(forumViewModel.getUser(userNick), PostFragment.this.getViewLifecycleOwner(), new Observer<User>() {
                     @Override
                     public void onChanged(final User user) {
                         if (user==null) return;
@@ -198,7 +214,8 @@ public class PostFragment extends BaseFragment {
                 }).setNegativeButton(getString(R.string.Cancel),null).show();
             }
 
-        },getResources().getColor(R.color.colorAccent), getResources());
+        },getResources());
+        postAdapter.setColors(getResources().getColor(R.color.colorAccent),getResources().getColor(R.color.white),getResources().getColor(R.color.colorPrimary));
 
         recyclerView = view.findViewById(R.id.recyclerView);
         recyclerView.setHasFixedSize(true);
@@ -250,7 +267,7 @@ public class PostFragment extends BaseFragment {
             }
         });
 
-        forumViewModel.getPosts(forum_id,topic_id).observe(this.getViewLifecycleOwner(), new Observer<PagedList<Post>>() {
+        forumViewModel.getPosts(forum_id,topic_id,filter).observe(this.getViewLifecycleOwner(), new Observer<PagedList<Post>>() {
             @Override
             public void onChanged(PagedList<Post> posts) {
                 if (posts.size()==0)
@@ -283,6 +300,10 @@ public class PostFragment extends BaseFragment {
             }
         });
 
+
+        if (savedInstanceState != null) {
+            retainedSearchString =savedInstanceState.getString(SEARCH_TEXT, null);
+        }
 
         return view;
     }
@@ -349,13 +370,13 @@ public class PostFragment extends BaseFragment {
         postDialog.show(mainactivity.getSupportFragmentManager(),"sendLK");
     }
 
-    private void aboutUser(int user_id){
+    private void aboutUser(final int user_id){
         forumViewModel.aboutUser(user_id, new ForumViewModel.NetworkListener() {
             @Override
             public void onSuccess(String message) {
                 AlertDialog.Builder dialog = new AlertDialog.Builder(maincontext);
                 dialog.setCancelable(true);
-                dialog.setMessage(message);
+                dialog.setMessage(HtmlCompat.fromHtml(message,HtmlCompat.FROM_HTML_MODE_COMPACT));
                 dialog.setPositiveButton(getString(R.string.Ok), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
@@ -366,7 +387,7 @@ public class PostFragment extends BaseFragment {
 
             @Override
             public void onError(String message) {
-
+                Toast.makeText(maincontext,message,Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -381,5 +402,60 @@ public class PostFragment extends BaseFragment {
         //если топик не закрыт, но мы не залогинены - делаем его только для чтения
         if (!currentTopicIsClosed)
             postAdapter.setIsReadOnly(value);
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        if (searchView!=null) {
+            outState.putString(SEARCH_TEXT, searchView.getQuery().toString());
+        }
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        menu.clear();
+        inflater.inflate(R.menu.search, menu);
+
+        //ассоциируем настройку поиска с SearchView
+        //!без этой строки иконка поиска будет добавлятся при каждом переключении на фрагмент
+        SearchManager searchManager = (SearchManager) mainactivity.getSystemService(Context.SEARCH_SERVICE);
+
+        MenuItem item = menu.findItem(R.id.search);
+        searchView = new SearchView((mainactivity).getSupportActionBar().getThemedContext());
+        MenuItemCompat.setActionView(item, searchView);
+        searchView.setOnQueryTextListener(this);
+
+        //раскрываем меню
+        searchView.onActionViewExpanded();
+        searchView.setFocusable(true);
+        searchView.requestFocusFromTouch();
+
+        if (!TextUtils.isEmpty(retainedSearchString)) {
+            item.expandActionView();
+            searchView.setQuery(retainedSearchString, true);
+            searchView.clearFocus();
+        }
+
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+
+
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+        filter=newText;
+        savePosition(linearLayoutManager,SHARED_OPTIONS);
+        forumViewModel.setFilteredPosts(forum_id,topic_id,filter);
+        //помечаем фильтр для выделения текста в адаптере
+        postAdapter.markText(filter);
+        //принудительная перерисовка recycleview
+        postAdapter.notifyDataSetChanged();
+        return false;
     }
 }

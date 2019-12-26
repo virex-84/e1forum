@@ -1,5 +1,7 @@
 package com.virex.e1forum.ui;
 
+import android.text.SpannableStringBuilder;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +16,7 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.virex.e1forum.R;
+import com.virex.e1forum.common.Utils;
 import com.virex.e1forum.db.entity.Topic;
 
 import java.text.SimpleDateFormat;
@@ -25,6 +28,10 @@ public class TopicAdapter extends PagedListAdapter<Topic, RecyclerView.ViewHolde
     private static final int EMPTY = 2;
 
     private TopicListener topicListener;
+
+    private String filter;
+    private int foregroundColor =-1;
+    private int backgroundColor =-1;
 
     public interface TopicListener {
         void onClick(Topic topic);
@@ -72,13 +79,17 @@ public class TopicAdapter extends PagedListAdapter<Topic, RecyclerView.ViewHolde
                 final Topic topic = getItem(position);
                 TopicHolder topicHolder= ((TopicHolder)holder);
 
-                if (topic.title==null) {
-                    topicHolder.tv_title.setText("?");
-                }
-                    else
-                    topicHolder.tv_title.setText(HtmlCompat.fromHtml(topic.title,HtmlCompat.FROM_HTML_MODE_COMPACT));
+                SpannableStringBuilder title=(SpannableStringBuilder)HtmlCompat.fromHtml(topic.title!=null ? topic.title : "?",HtmlCompat.FROM_HTML_MODE_COMPACT);
+                SpannableStringBuilder user=(SpannableStringBuilder)HtmlCompat.fromHtml(topic.userName,HtmlCompat.FROM_HTML_MODE_COMPACT);
 
-                topicHolder.tv_username.setText(HtmlCompat.fromHtml(topic.userName,HtmlCompat.FROM_HTML_MODE_COMPACT));
+                if (!TextUtils.isEmpty(filter)) {
+                    title= Utils.makeSpanText(holder.itemView.getContext(),title,filter,foregroundColor,backgroundColor);
+
+                    user=Utils.makeSpanText(holder.itemView.getContext(),user,filter,foregroundColor,backgroundColor);
+                }
+
+                topicHolder.tv_title.setText(title);
+                topicHolder.tv_username.setText(user);
 
                 if (topic.isAttathed)
                     topicHolder.iv_attach.setVisibility(View.VISIBLE);
@@ -119,6 +130,15 @@ public class TopicAdapter extends PagedListAdapter<Topic, RecyclerView.ViewHolde
             default:
                 break;
         }
+    }
+
+    public void setColors(int foregroundColor, int backgroundColor) {
+        this.foregroundColor=foregroundColor;
+        this.backgroundColor=backgroundColor;
+    }
+
+    public void markText(String filter) {
+        this.filter=filter;
     }
 
     class TopicHolder extends RecyclerView.ViewHolder {

@@ -34,6 +34,9 @@ public interface TopicDao {
     @Query("SELECT * FROM topic WHERE forum_id=:forum_id ORDER BY isAttathed desc, isBookMark desc, lastmod desc")
     DataSource.Factory<Integer, Topic> dataSourcePagedList(int forum_id);
 
+    @Query("SELECT * FROM topic WHERE forum_id=:forum_id AND ((titleSearch LIKE '%'||:filter||'%') OR (userSearch LIKE '%'||:filter||'%')) ORDER BY isAttathed desc, isBookMark desc, lastmod desc")
+    DataSource.Factory<Integer, Topic> dataSourcePagedList(int forum_id, String filter);
+
     @Query("SELECT pagesCount FROM topic WHERE forum_id=:forum_id AND id=:topic_id")
     LiveData<Integer> getPagesCount(int forum_id, int topic_id);
 

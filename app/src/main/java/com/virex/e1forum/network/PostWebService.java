@@ -1,8 +1,11 @@
 package com.virex.e1forum.network;
 
+import java.util.HashMap;
+
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Field;
+import retrofit2.http.FieldMap;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.Headers;
@@ -86,6 +89,17 @@ public interface PostWebService {
                               @Field(value="body", encoded=true) String body,
                               @Field(value="send", encoded=true) String send
     );
+
+    @GET("https://www.e1.ru/talk/forum/email.php")
+    Call<ResponseBody> prepareMail(@Query("id") String user_id);
+
+    @FormUrlEncoded
+    @POST("https://www.e1.ru/talk/forum/email.php")
+    Call<ResponseBody> sendMail(@Field("subject") String subject,
+                                @Field("text") String text,
+                                @Field("save") String save,
+                                @FieldMap HashMap<String, String> hashFields//динамический список параметров
+                                );
 
     //www.e1.ru/talk/forum/personal_info.php?user=
     @GET("https://www.e1.ru/talk/forum/personal_info.php")

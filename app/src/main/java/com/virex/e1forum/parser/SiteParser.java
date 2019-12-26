@@ -94,8 +94,10 @@ public class SiteParser {
                         topic.id=Integer.parseInt(list[list.length-1]);
 
                     topic.title=element.getElementsByClass("title-cont").text();
+                    topic.titleSearch=topic.title.toLowerCase();
                     topic.comments=element.getElementsByClass("comments-wrap").text();
                     topic.userName=element.getElementsByClass("username-cont").html();
+                    topic.userSearch=element.getElementsByClass("username-cont").text().toLowerCase();
                     topic.lastComment=element.getElementsByClass("comment-date").text();
                     topic.isClosed=!element.getElementsByClass("lock-ico").isEmpty();
                     topic.isAttathed=!element.getElementsByClass("attach-ico").isEmpty();
@@ -223,7 +225,9 @@ public class SiteParser {
                     //if (user.user_id>0)
                         //post.user=String.format(Locale.ENGLISH,"<b><a href=\"%s\">%s</a></b>","user:".concat(userNick),userNick);
                     //else
-                        post.user=String.format(Locale.ENGLISH,"<a href=\"%s\">%s</a>","user:".concat(userNick),userNick);
+                        //post.user=String.format(Locale.ENGLISH,"<a href=\"%s\">%s</a>","user:".concat(userNick),userNick);
+                    post.user=userNick;
+                    post.userSearch=userNick.toLowerCase();
 
                     Elements tags=element.getElementsByClass("theme-text");
 
@@ -242,7 +246,7 @@ public class SiteParser {
                     }
 
                     post.text=tags.html();
-                    //post.text=element.getElementsByClass("theme-text").html();
+                    post.textSearch=tags.html().toLowerCase();
 
                     Elements votes=element.getElementsByClass("vote-res").select("span");
 

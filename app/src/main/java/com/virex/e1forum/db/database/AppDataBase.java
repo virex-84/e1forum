@@ -5,6 +5,7 @@ import android.content.Context;
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
+import androidx.room.TypeConverters;
 
 import com.virex.e1forum.db.dao.ForumDao;
 import com.virex.e1forum.db.dao.PostDao;
@@ -19,6 +20,7 @@ import com.virex.e1forum.db.entity.User;
  * База данных Room
  */
 @Database(entities = {Forum.class, Topic.class, Post.class, User.class}, version = 1, exportSchema = false)
+@TypeConverters(RoomConverter.class)
 public abstract class AppDataBase extends RoomDatabase {
     private static AppDataBase instance;
 
