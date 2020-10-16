@@ -111,7 +111,7 @@ public class TopicFragment extends BaseFragment implements SearchView.OnQueryTex
         topicAdapter.setColors(getResources().getColor(R.color.white),getResources().getColor(R.color.colorPrimary));
 
         RecyclerView recyclerView = view.findViewById(R.id.recyclerView);
-        recyclerView.setHasFixedSize(true);
+        //recyclerView.setHasFixedSize(true);
         linearLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());

@@ -237,7 +237,7 @@ public class PostFragment extends BaseFragment  implements SearchView.OnQueryTex
         postAdapter.setColors(getResources().getColor(R.color.colorAccent),getResources().getColor(R.color.white),getResources().getColor(R.color.colorPrimary));
 
         recyclerView = view.findViewById(R.id.recyclerView);
-        recyclerView.setHasFixedSize(true);
+        //recyclerView.setHasFixedSize(true);
         linearLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
