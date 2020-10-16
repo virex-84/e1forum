@@ -47,7 +47,8 @@ public class Topic {
 
         @Override
         public boolean areContentsTheSame(@NonNull Topic oldItem, @NonNull Topic newItem) {
-            return  (oldItem.title.contains(newItem.title) && (oldItem.isBookMark==newItem.isBookMark));
+            //return  (oldItem.title.contains(newItem.title) && (oldItem.isBookMark==newItem.isBookMark));
+            return oldItem==newItem;
         }
     };
 }

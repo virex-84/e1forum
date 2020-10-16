@@ -1,6 +1,7 @@
 package com.virex.e1forum.common;
 
 import android.content.Context;
+import android.os.Environment;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
@@ -13,6 +14,9 @@ import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -72,6 +76,20 @@ public class Utils {
         return source;
     }
 
+    public static void writeFileOnInternalStorage(Context context,String fileName, byte[] body){
+        try{
+            String download= Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
+            File file = new File(download,fileName);
+            if(!file.exists()){
+                file.createNewFile();
+            }
+            FileOutputStream fos = new FileOutputStream(file);
+            fos.write(body);
+            fos.close();
+        }catch (Exception e){
+            e.printStackTrace();
 
+        }
+    }
 
 }

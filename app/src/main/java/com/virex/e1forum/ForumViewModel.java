@@ -58,6 +58,20 @@ public class ForumViewModel extends AndroidViewModel {
     private MediatorLiveData<PagedList<Post>> filteredPosts=new MediatorLiveData<>();
     private LiveData<PagedList<Post>> posts;
 
+    //все сообщения
+    private MediatorLiveData<WorkInfo> messages=new MediatorLiveData<>();
+
+    Observer<WorkInfo> observer = new Observer<WorkInfo>() {
+        @Override
+        public void onChanged(WorkInfo workInfo) {
+            messages.setValue(workInfo);
+        }
+    };
+
+    public LiveData<WorkInfo> getAllMessages(){
+        return messages;
+    }
+
     public interface NetworkListener {
         void onSuccess(String message);
         void onError(String message);
@@ -92,7 +106,9 @@ public class ForumViewModel extends AndroidViewModel {
                 .setInputData(data)
                 .build();
         WorkManager.getInstance(application).enqueueUniqueWork("loadForums", ExistingWorkPolicy.REPLACE,simpleRequest);
-        return WorkManager.getInstance(getApplication()).getWorkInfoByIdLiveData(simpleRequest.getId());
+        LiveData<WorkInfo> result=WorkManager.getInstance(getApplication()).getWorkInfoByIdLiveData(simpleRequest.getId());
+        result.observeForever(observer);
+        return result;
     }
 
     /*
@@ -187,8 +203,9 @@ public class ForumViewModel extends AndroidViewModel {
                 .build();
         OneTimeWorkRequest simpleRequest = new OneTimeWorkRequest.Builder(TopicsWorker.class).setInputData(data).build();
         WorkManager.getInstance(application).enqueueUniqueWork("loadTopics", ExistingWorkPolicy.REPLACE,simpleRequest);
-        //return WorkManager.getInstance(getApplication()).getWorkInfosByTagLiveData(simpleRequest.getId().toString());
-        return WorkManager.getInstance(getApplication()).getWorkInfoByIdLiveData(simpleRequest.getId());
+        LiveData<WorkInfo> result=WorkManager.getInstance(getApplication()).getWorkInfoByIdLiveData(simpleRequest.getId());
+        result.observeForever(observer);
+        return result;
     }
 
     PagedList<Topic> emptyTopicPagedList(){
@@ -334,7 +351,9 @@ public class ForumViewModel extends AndroidViewModel {
         OneTimeWorkRequest simpleRequest = new OneTimeWorkRequest.Builder(PostsWorker.class).setInputData(data).build();
 
         WorkManager.getInstance(application).enqueueUniqueWork("loadPosts", ExistingWorkPolicy.REPLACE,simpleRequest);
-        return WorkManager.getInstance(getApplication()).getWorkInfoByIdLiveData(simpleRequest.getId());
+        LiveData<WorkInfo> result=WorkManager.getInstance(getApplication()).getWorkInfoByIdLiveData(simpleRequest.getId());
+        result.observeForever(observer);
+        return result;
     }
 
     LiveData<Topic> getTopicLive(int forum_id, int topic_id){

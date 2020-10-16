@@ -60,10 +60,12 @@ public class SiteParser {
                 Document document = Jsoup.parse(text);
                 Elements allA=document.select("a");
                 for(Element element:allA){
-                    if (element.attr("href").contains("/talk/forum/list.php?f=")){
+                    if (element.attr("href").contains("list.php?f=")){
                         Forum forum=new Forum();
                         forum.title=element.text();
-                        forum.id =Integer.parseInt(element.attr("href").replace("/talk/forum/list.php?f=",""));
+                        //forum.id = Integer.parseInt(element.attr("href").replace("list.php?f=", ""));
+                        String href=element.attr("href");
+                        forum.id = Integer.parseInt(href.substring(href.lastIndexOf('=')+1));
                         parserListener.onParse(forum, ParseStatus.INPROCESS);
                     }
                 }
@@ -162,7 +164,16 @@ public class SiteParser {
             case PARCE_MOBILE_SITE:
                 parserListener.onParse((Post) null, ParseStatus.START);
                 Document document = Jsoup.parse(text);
+
+                //переделываем все <span class="message-smiles__elem mark-head-smiles__elem20">:beer:</span> в картинки
+                //document.getElementsByClass("message-smiles__elem").tagName("img").attr("href", "your-source-here");
+                Elements icons=document.getElementsByClass("message-smiles__elem");
+                for(Element icon:icons) {
+                    icon.attr("src", "local="+icon.text()).tagName("img");
+                }
+
                 Elements allItems=document.getElementsByClass("theme-item");
+
                 for(Element element:allItems) {
                     Post post = new Post();
 

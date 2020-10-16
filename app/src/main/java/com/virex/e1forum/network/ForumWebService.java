@@ -11,6 +11,6 @@ public interface ForumWebService {
     //https://www.e1.ru/talk/forum/
     //https://www.e1.ru/talk/forum/list.php?f=67
 
-    @GET("https://www.e1.ru/talk/forum/")
+    @GET("https://e1.ru/talk/forum/")
     Call<ResponseBody> getForums();
 }

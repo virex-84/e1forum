@@ -61,15 +61,15 @@ public interface PostWebService {
                             );
 
     //https://www.e1.ru/talk/forum/moderator.php?f=22&m=64253&mobile=1
-    @GET("https://www.e1.ru/talk/forum/moderator.php")
+    @GET("https://e1.ru/talk/forum/moderator.php")
     Call<ResponseBody> sendModerator(@Query("f") int forum_id, @Query("m") int post_id);
 
     //https://www.e1.ru/talk/forum/pm/message.php?u=21580372p5266bae852ef5bc4f9b242e13a6bdfe8
-    @GET("https://www.e1.ru/talk/forum/pm/message.php")
+    @GET("https://e1.ru/talk/forum/pm/message.php")
     Call<ResponseBody> prepareLK(@Query("u") String user_id);
 
     @FormUrlEncoded
-    @POST("https://www.e1.ru/talk/forum/pm/message.php")
+    @POST("https://e1.ru/talk/forum/pm/message.php")
     Call<ResponseBody> sendLK(@Field("_submit") String _submit,
                               @Field("type_message") String type_message,
                               @Field("type_message_checksum") String type_message_checksum,
@@ -90,11 +90,11 @@ public interface PostWebService {
                               @Field(value="send", encoded=true) String send
     );
 
-    @GET("https://www.e1.ru/talk/forum/email.php")
+    @GET("https://e1.ru/talk/forum/email.php")
     Call<ResponseBody> prepareMail(@Query("id") String user_id);
 
     @FormUrlEncoded
-    @POST("https://www.e1.ru/talk/forum/email.php")
+    @POST("https://e1.ru/talk/forum/email.php")
     Call<ResponseBody> sendMail(@Field("subject") String subject,
                                 @Field("text") String text,
                                 @Field("save") String save,
@@ -102,6 +102,6 @@ public interface PostWebService {
                                 );
 
     //www.e1.ru/talk/forum/personal_info.php?user=
-    @GET("https://www.e1.ru/talk/forum/personal_info.php")
+    @GET("https://e1.ru/talk/forum/personal_info.php")
     Call<ResponseBody> aboutUser(@Query("user") int user_id);
 }

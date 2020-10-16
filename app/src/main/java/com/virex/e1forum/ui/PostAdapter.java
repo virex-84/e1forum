@@ -16,6 +16,7 @@ import android.text.style.URLSpan;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -61,7 +62,7 @@ public class PostAdapter extends PagedListAdapter<Post, RecyclerView.ViewHolder>
     public interface PostListener {
         void onLinkClick(String link);
         void onUserClick(String userNick, TextView widget);
-        void onImageClick(Drawable drawable);
+        void onImageClick(Drawable drawable, String filename,boolean isLongClick);
         void onVoteClick(Post post, VoteType voteType);
         void onReplyClick(Post post);
         void onQuoteClick(Post post);
@@ -76,8 +77,24 @@ public class PostAdapter extends PagedListAdapter<Post, RecyclerView.ViewHolder>
 
         //отрабатываем нажатие на ссылки
         this.linkMovementMethod=new LinkMovementMethod(){
+            long longClickDelay = ViewConfiguration.getLongPressTimeout();
+            long startTime;
+            boolean isLong=false;
+
             @Override
             public boolean onTouchEvent(TextView widget, Spannable buffer, MotionEvent event) {
+
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    startTime = System.currentTimeMillis();
+                    isLong=false;
+                }
+
+                if (event.getAction() == MotionEvent.ACTION_UP) {
+                    long currentTime = System.currentTimeMillis();
+                    if (currentTime - startTime >= longClickDelay)
+                        isLong=true;
+                }
+
                 if (event.getAction() != MotionEvent.ACTION_UP)
                     return super.onTouchEvent(widget, buffer, event);
 
@@ -110,7 +127,7 @@ public class PostAdapter extends PagedListAdapter<Post, RecyclerView.ViewHolder>
                 ImageSpan[] spanImage = buffer.getSpans(off, off, ImageSpan.class);
                 if (spanImage.length != 0) {
                     if(PostAdapter.this.postListener!=null)
-                        PostAdapter.this.postListener.onImageClick(spanImage[0].getDrawable());
+                        PostAdapter.this.postListener.onImageClick(spanImage[0].getDrawable(),spanImage[0].getSource(),isLong);
                 }
 
                 return true;

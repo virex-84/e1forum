@@ -26,9 +26,11 @@ import androidx.core.text.HtmlCompat;
 import androidx.core.view.MenuItemCompat;
 import androidx.lifecycle.Observer;
 import androidx.paging.PagedList;
+import androidx.recyclerview.widget.ConcatAdapter;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.work.Data;
 import androidx.work.WorkInfo;
 
 import com.virex.e1forum.common.Utils;
@@ -37,6 +39,7 @@ import com.virex.e1forum.db.entity.Topic;
 import com.virex.e1forum.db.entity.User;
 import com.virex.e1forum.network.VoteType;
 import com.virex.e1forum.parser.SiteParser;
+import com.virex.e1forum.ui.FooterAdapter;
 import com.virex.e1forum.ui.GlideImageGetter;
 import com.virex.e1forum.ui.PostAdapter;
 import com.virex.e1forum.ui.PostDialog;
@@ -44,8 +47,14 @@ import com.virex.e1forum.ui.SwipyRefreshLayout.SwipyRefreshLayout;
 import com.virex.e1forum.ui.SwipyRefreshLayout.SwipyRefreshLayoutDirection;
 import com.virex.e1forum.ui.ZoomImageDialog;
 
+import java.io.File;
 import java.util.Locale;
 
+import static androidx.work.WorkInfo.State.CANCELLED;
+import static androidx.work.WorkInfo.State.ENQUEUED;
+import static androidx.work.WorkInfo.State.FAILED;
+import static androidx.work.WorkInfo.State.RUNNING;
+import static androidx.work.WorkInfo.State.SUCCEEDED;
 import static com.virex.e1forum.repository.PostsWorker.POSTS_MESSAGE;
 
 /**
@@ -64,6 +73,7 @@ public class PostFragment extends BaseFragment  implements SearchView.OnQueryTex
 
     private SwipyRefreshLayout swipeRefreshLayout;
     private PostAdapter postAdapter;
+    private FooterAdapter footerAdapter;
     private ForumViewModel forumViewModel;
 
 
@@ -152,14 +162,23 @@ public class PostFragment extends BaseFragment  implements SearchView.OnQueryTex
             }
 
             @Override
-            public void onImageClick(Drawable drawable) {
+            public void onImageClick(Drawable drawable, String filename,boolean isLongClick) {
                 if (drawable == null )return;
                 if (drawable instanceof GlideImageGetter.FutureDrawable) {
                     //не открываем окно просмотра для локальных смайлов
                     if (((GlideImageGetter.FutureDrawable) drawable).isLocalImage) return;
 
-                    ZoomImageDialog zoomImageDialog = new ZoomImageDialog(drawable.getCurrent());
-                    zoomImageDialog.show(mainactivity.getSupportFragmentManager(), "zoom_image");
+
+
+                    if (filename!=null)
+                        filename=new File(filename).getName();
+
+                    if (((GlideImageGetter.FutureDrawable) drawable).isGif){
+                        ((GlideImageGetter.FutureDrawable) drawable).play();
+                    } else {
+                        ZoomImageDialog zoomImageDialog = new ZoomImageDialog(drawable.getCurrent(), filename);
+                        zoomImageDialog.show(mainactivity.getSupportFragmentManager(), "zoom_image");
+                    }
                 }
             }
 
@@ -222,7 +241,18 @@ public class PostFragment extends BaseFragment  implements SearchView.OnQueryTex
         linearLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
-        recyclerView.setAdapter(postAdapter);
+
+        footerAdapter = new FooterAdapter(new FooterAdapter.OnItemClickListener() {
+            @Override
+            public void onReloadClick() {
+                forumViewModel.loadPosts(forum_id,topic_id,0);
+            }
+        });
+
+        ConcatAdapter concatAdapter=new ConcatAdapter(postAdapter,footerAdapter);
+        recyclerView.setAdapter(concatAdapter);
+
+        //recyclerView.setAdapter(postAdapter);
 
         swipeRefreshLayout =  view.findViewById(R.id.swipeRefreshLayout);
         //цвета анимации загрузки
@@ -249,21 +279,40 @@ public class PostFragment extends BaseFragment  implements SearchView.OnQueryTex
                   если постов например 5, то при делении на 25 = 0, поэтому будем обновлять текущую (нулевую) страницу
                   если постов например 30, то 30/25=1,2 (остаток 2 отбрасывается), поэтому будем обновлять вторую страницу (номер 1, т.к. нумерация с нуля)
                 */
-                forumViewModel.loadPosts(forum_id,topic_id,current_page_id).observe(PostFragment.this.getViewLifecycleOwner(), new Observer<WorkInfo>() {
-                    @Override
-                    public void onChanged(WorkInfo workInfo) {
-                        if (workInfo==null) return;
-                        switch(workInfo.getState()){
-                            case SUCCEEDED:
-                                swipeRefreshLayout.setRefreshing(false);
-                                break;
-                            case FAILED:
-                                Toast.makeText(getContext(),workInfo.getOutputData().getString(POSTS_MESSAGE),Toast.LENGTH_SHORT).show();
-                                swipeRefreshLayout.setRefreshing(false);
-                                break;
-                        }
+                forumViewModel.loadPosts(forum_id,topic_id,current_page_id);
+            }
+        });
+
+        forumViewModel.getAllMessages().observe(this.getViewLifecycleOwner(), new Observer<WorkInfo>() {
+            @Override
+            public void onChanged(WorkInfo workInfo) {
+                if (workInfo==null) return;
+
+                if (workInfo.getState()==RUNNING || workInfo.getState()==ENQUEUED ){
+                    footerAdapter.setStatus(FooterAdapter.Status.LOADING,null);
+                }
+
+                if (workInfo.getState()==FAILED  || workInfo.getState()==CANCELLED) {
+                    Data data = workInfo.getOutputData();
+                    if (data.getString(POSTS_MESSAGE) != null) {
+                        footerAdapter.setStatus(FooterAdapter.Status.ERROR,workInfo.getOutputData().getString(POSTS_MESSAGE));
                     }
-                });
+                }
+
+                if (workInfo.getState()==SUCCEEDED ){
+                    footerAdapter.setStatus(FooterAdapter.Status.SUCCESS,null);
+                }
+
+                switch(workInfo.getState()){
+                    case SUCCEEDED:
+                        swipeRefreshLayout.setRefreshing(false);
+                        break;
+                    case FAILED:
+                    case CANCELLED:
+                        Toast.makeText(getContext(),workInfo.getOutputData().getString(POSTS_MESSAGE),Toast.LENGTH_SHORT).show();
+                        swipeRefreshLayout.setRefreshing(false);
+                        break;
+                }
             }
         });
 

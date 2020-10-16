@@ -67,7 +67,8 @@ public class Post {
 
         @Override
         public boolean areContentsTheSame(@NonNull Post oldItem, @NonNull Post newItem) {
-            return  (oldItem.text.contains(newItem.text) && (oldItem.carmaPlus==newItem.carmaPlus) && (oldItem.carmaMinus==newItem.carmaMinus) && (oldItem.lastmod==newItem.lastmod) && (oldItem.disableCarma==newItem.disableCarma));
+            //return  (oldItem.text.contains(newItem.text) && (oldItem.carmaPlus==newItem.carmaPlus) && (oldItem.carmaMinus==newItem.carmaMinus) && (oldItem.lastmod==newItem.lastmod) && (oldItem.disableCarma==newItem.disableCarma));
+            return oldItem==newItem;
         }
     };
 }

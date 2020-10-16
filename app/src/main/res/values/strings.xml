@@ -13,6 +13,7 @@
 
     <string name="Ok">Ок</string>
     <string name="Close">Закрыть</string>
+    <string name="Save">Сохранить</string>
     <string name="Login">Логин</string>
     <string name="Logout">Выход</string>
     <string name="Password">Пароль</string>
@@ -33,6 +34,7 @@
     <string name="send_to_moderator">Сообщить модератору?</string>
     <string name="Title">Введите заголовок</string>
     <string name="Text">Введите текст</string>
+    <string name="EnterFileName">Введите имя файла</string>
 
     <string name="textBold">Bold</string>
     <string name="textItalic">Italic</string>
@@ -43,4 +45,6 @@
 
     <string name="insert_code">Введите код</string>
     <string name="insert_url">Введите URL адрес</string>
+
+    <string name="app_crash_title">Упс… Программа завершилась с ошибкой…</string>
 </resources>
