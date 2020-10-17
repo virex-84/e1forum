@@ -3,6 +3,7 @@ package com.virex.e1forum;
 import android.app.SearchManager;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -106,6 +107,19 @@ public class TopicFragment extends BaseFragment implements SearchView.OnQueryTex
             public void onBookMark(Topic topic) {
                 savePosition(linearLayoutManager,SHARED_OPTIONS);
                 forumViewModel.checkTopicBookmark(topic);
+            }
+
+            @Override
+            public void onCurrentListLoaded() {
+                //адаптер загружен - возвращаемся на сохраненную позицию
+                restorePosition(linearLayoutManager,SHARED_OPTIONS);
+                //fix
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        restorePosition(linearLayoutManager,SHARED_OPTIONS);
+                    }
+                }, 10);
             }
         });
         topicAdapter.setColors(getResources().getColor(R.color.white),getResources().getColor(R.color.colorPrimary));
@@ -287,8 +301,9 @@ public class TopicFragment extends BaseFragment implements SearchView.OnQueryTex
 
     @Override
     public boolean onQueryTextChange(String newText) {
+        if (!TextUtils.isEmpty(newText))
+            savePosition(linearLayoutManager,SHARED_OPTIONS);
         filter=newText;
-        savePosition(linearLayoutManager,SHARED_OPTIONS);
         forumViewModel.setFilteredTopics(forum_id,filter);
         //помечаем фильтр для выделения текста в адаптере
         topicAdapter.markText(filter);

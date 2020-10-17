@@ -24,7 +24,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.text.HtmlCompat;
+import androidx.paging.PagedList;
 import androidx.paging.PagedListAdapter;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
@@ -67,6 +69,7 @@ public class PostAdapter extends PagedListAdapter<Post, RecyclerView.ViewHolder>
         void onReplyClick(Post post);
         void onQuoteClick(Post post);
         void onModeratorClick(Post post);
+        void onCurrentListLoaded();
     }
 
     public PostAdapter(@NonNull DiffUtil.ItemCallback<Post> diffCallback, PostListener postListener, Resources resources) {
@@ -133,6 +136,13 @@ public class PostAdapter extends PagedListAdapter<Post, RecyclerView.ViewHolder>
                 return true;
             }
         };
+    }
+
+    @Override
+    public void onCurrentListChanged(@Nullable PagedList<Post> previousList, @Nullable PagedList<Post> currentList) {
+        super.onCurrentListChanged(previousList, currentList);
+        if(PostAdapter.this.postListener!=null)
+            PostAdapter.this.postListener.onCurrentListLoaded();
     }
 
     public void setColors(int spanColor, int foregroundColor, int backgroundColor) {

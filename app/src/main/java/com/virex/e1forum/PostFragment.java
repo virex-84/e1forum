@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -233,6 +234,20 @@ public class PostFragment extends BaseFragment  implements SearchView.OnQueryTex
                 }).setNegativeButton(getString(R.string.Cancel),null).show();
             }
 
+            @Override
+            public void onCurrentListLoaded() {
+                //адаптер загружен - возвращаемся на сохраненную позицию
+                restorePosition(linearLayoutManager,SHARED_OPTIONS);
+                //fix
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        restorePosition(linearLayoutManager,SHARED_OPTIONS);
+                    }
+                }, 10);
+
+            }
+
         },getResources());
         postAdapter.setColors(getResources().getColor(R.color.colorAccent),getResources().getColor(R.color.white),getResources().getColor(R.color.colorPrimary));
 
@@ -323,7 +338,6 @@ public class PostFragment extends BaseFragment  implements SearchView.OnQueryTex
                     postAdapter.submitList(forumViewModel.emptyPostPagedList());
                 else {
                     postAdapter.submitList(posts);
-                    restorePosition(linearLayoutManager,SHARED_OPTIONS);
                 }
             }
         });
@@ -498,8 +512,10 @@ public class PostFragment extends BaseFragment  implements SearchView.OnQueryTex
 
     @Override
     public boolean onQueryTextChange(String newText) {
+        if (!TextUtils.isEmpty(newText))
+            savePosition(linearLayoutManager,SHARED_OPTIONS);
+
         filter=newText;
-        savePosition(linearLayoutManager,SHARED_OPTIONS);
         forumViewModel.setFilteredPosts(forum_id,topic_id,filter);
         //помечаем фильтр для выделения текста в адаптере
         postAdapter.markText(filter);

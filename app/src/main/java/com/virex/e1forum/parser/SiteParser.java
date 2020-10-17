@@ -13,6 +13,7 @@ import com.virex.e1forum.db.entity.User;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.nodes.TextNode;
 import org.jsoup.select.Elements;
 
 import java.io.UnsupportedEncodingException;
@@ -170,6 +171,8 @@ public class SiteParser {
                 Elements icons=document.getElementsByClass("message-smiles__elem");
                 for(Element icon:icons) {
                     icon.attr("src", "local="+icon.text()).tagName("img");
+                    for (TextNode node : icon.textNodes())
+                        node.remove();
                 }
 
                 Elements allItems=document.getElementsByClass("theme-item");

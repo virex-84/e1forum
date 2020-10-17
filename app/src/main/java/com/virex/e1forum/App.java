@@ -16,6 +16,9 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLSession;
+
 import okhttp3.Cookie;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
@@ -76,6 +79,13 @@ public class App extends Application {
                 .followSslRedirects(true)
                 //куки
                 .cookieJar(prefCookieJar)
+                //доверяем любым ssl сертификатам
+                .hostnameVerifier(new HostnameVerifier() {
+                    @Override
+                    public boolean verify(String s, SSLSession sslSession) {
+                        return true;
+                    }
+                })
                 .build();
 
         Retrofit retrofit = new Retrofit.Builder()

@@ -10,13 +10,16 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.text.HtmlCompat;
+import androidx.paging.PagedList;
 import androidx.paging.PagedListAdapter;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.virex.e1forum.R;
 import com.virex.e1forum.common.Utils;
+import com.virex.e1forum.db.entity.Post;
 import com.virex.e1forum.db.entity.Topic;
 
 import java.text.SimpleDateFormat;
@@ -36,11 +39,19 @@ public class TopicAdapter extends PagedListAdapter<Topic, RecyclerView.ViewHolde
     public interface TopicListener {
         void onClick(Topic topic);
         void onBookMark(Topic topic);
+        void onCurrentListLoaded();
     }
 
     public TopicAdapter(@NonNull DiffUtil.ItemCallback<Topic> diffCallback, TopicListener topicListener) {
         super(diffCallback);
         this.topicListener=topicListener;
+    }
+
+    @Override
+    public void onCurrentListChanged(@Nullable PagedList<Topic> previousList, @Nullable PagedList<Topic> currentList) {
+        super.onCurrentListChanged(previousList, currentList);
+        if (topicListener!=null)
+            topicListener.onCurrentListLoaded();
     }
 
     @Override
