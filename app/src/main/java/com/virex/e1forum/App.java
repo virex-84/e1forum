@@ -24,7 +24,6 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-import javax.security.cert.CertificateException;
 
 import okhttp3.Cookie;
 import okhttp3.OkHttpClient;
@@ -60,7 +59,9 @@ public class App extends Application {
             @Override
             public void uncaughtException(Thread thread, Throwable throwable) {
                 handleUncaughtException(thread, throwable);
-                handler.uncaughtException(thread, throwable);
+                if (handler != null) {
+                    handler.uncaughtException(thread, throwable);
+                }
             }
         });
         

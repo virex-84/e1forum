@@ -51,10 +51,10 @@ public class PostAdapter extends PagedListAdapter<Post, RecyclerView.ViewHolder>
     private static final int ITEM = 1;
     private static final int EMPTY = 2;
 
-    private Resources resources;
+    private final Resources resources;
 
-    private LinkMovementMethod linkMovementMethod;
-    private PostListener postListener;
+    private final LinkMovementMethod linkMovementMethod;
+    private final PostListener postListener;
 
     private String filter;
     private int spanColor=0;

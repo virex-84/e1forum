@@ -1,8 +1,8 @@
 package com.virex.e1forum.ui;
 
+import android.annotation.SuppressLint;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
@@ -10,7 +10,6 @@ import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.text.Html;
-import android.util.Pair;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -19,18 +18,17 @@ import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
-import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.virex.e1forum.R;
 import com.virex.e1forum.common.GlideApp;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 
 public class GlideImageGetter implements Html.ImageGetter,Drawable.Callback {
-    private Resources resources;
-    private TextView textView;
+    private final Resources resources;
+    private final TextView textView;
     //private ArrayList<Pair<String, String>> icons = new ArrayList<Pair<String, String>>();
     HashMap<String, String> icons = new HashMap<String, String>();
 
@@ -150,14 +148,16 @@ public class GlideImageGetter implements Html.ImageGetter,Drawable.Callback {
 
         GlideApp.with(textView)
                 .asDrawable()
+                .placeholder(R.drawable.ic_empty_image)
+                .error(R.drawable.ic_error_image)
                 .load(Uri.parse(imgsource))
                 .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
-                .into(new SimpleTarget<Drawable>() {
+                .into(new CustomTarget<Drawable>() {
                     @Override
                     public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
 
                         int maxWidth = 300;
-                        if (imgsource.contains(".gif")) {
+                        if (resource instanceof GifDrawable) {
                             GifDrawable gifDrawable = (GifDrawable) resource;
 
                             if (gifDrawable.getIntrinsicWidth() > maxWidth) {
@@ -166,7 +166,7 @@ public class GlideImageGetter implements Html.ImageGetter,Drawable.Callback {
                             } else {
                                 int width=(int) (gifDrawable.getIntrinsicWidth() * 2.5) ;
                                 int height=(int) (gifDrawable.getIntrinsicHeight() * 2.5);
-                                  gifDrawable.setBounds(0, 0, width, height);
+                                gifDrawable.setBounds(0, 0, width, height);
                             }
 
                             //смайлы-гифки запускаем автоматически
@@ -186,6 +186,14 @@ public class GlideImageGetter implements Html.ImageGetter,Drawable.Callback {
                                 resource.setBounds(0, 0, resource.getIntrinsicWidth(), resource.getIntrinsicHeight());
                             }
                             result.setDrawable(resource);
+                        }
+                    }
+
+                    @Override
+                    public void onLoadCleared(@Nullable Drawable placeholder) {
+                        if (null != placeholder) {
+                            if (placeholder instanceof GifDrawable)
+                                ((GifDrawable) placeholder).stop();
                         }
                     }
                 });
@@ -212,8 +220,20 @@ public class GlideImageGetter implements Html.ImageGetter,Drawable.Callback {
         private Drawable drawable;
         public boolean isGif=false;
         public boolean isLocalImage=false;
+        Bitmap play;
 
+        private Bitmap getBitmap(Drawable vectorDrawable) {
+            Bitmap bitmap = Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(),
+                    vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(bitmap);
+            vectorDrawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+            vectorDrawable.draw(canvas);
+            return bitmap;
+        }
+
+        @SuppressLint("UseCompatLoadingForDrawables")
         FutureDrawable(Resources res) {
+            play = getBitmap(res.getDrawable(R.drawable.ic_play));
         }
 
         @Override
@@ -225,16 +245,24 @@ public class GlideImageGetter implements Html.ImageGetter,Drawable.Callback {
                     //если гифка в паузе
                     //рисуем значок поверх изображения
                     if(!((GifDrawable)this.drawable).isRunning()){
-                        Bitmap check = BitmapFactory.decodeResource(resources, R.drawable.ic_play);
-                        int width=check.getWidth();
-                        int height=check.getHeight();
-                        //int width = getBounds().width()/4;
-                        //int height = getBounds().height()/4;
-                        check=Bitmap.createScaledBitmap(check,  width, height, false);
+                        //int width=play.getWidth();
+                        //int height=play.getHeight();
+
+                        //т.к. размер картинки может быть не пропорциональным
+                        //берем размер например высоты
+                        int width=getBounds().width() / 4;
+                        int height=width;
+
+                        if (width==0 | height==0){
+                            width=play.getWidth();
+                            height=play.getHeight();
+                        }
+
+                        play=Bitmap.createScaledBitmap(play,  width, height, false);
 
                         int x = (getBounds().width() - width) / 2;
                         int y = (getBounds().height() - height) / 2;
-                        canvas.drawBitmap(check, x, y, new Paint(Paint.FILTER_BITMAP_FLAG));
+                        canvas.drawBitmap(play, x, y, new Paint(Paint.FILTER_BITMAP_FLAG));
                     }
             }
         }

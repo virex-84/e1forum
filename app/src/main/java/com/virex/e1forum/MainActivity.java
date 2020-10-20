@@ -67,10 +67,12 @@ public class MainActivity extends AppCompatActivity
         navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+
         //восстанавливаем ранее открытый фрагмент
         if (savedInstanceState != null) {
-            Fragment currentFragment = getSupportFragmentManager().getFragment(savedInstanceState, CURRENT_FRAGMENT);
-            goFragment(currentFragment,null);
+            //не восстанавливаем фрагмент
+            //Fragment currentFragment = getSupportFragmentManager().getFragment(savedInstanceState, CURRENT_FRAGMENT);
+            //goFragment(currentFragment,null);
         } else {
             //либо стартовая страница - каталог
             onMenuClick(R.id.nav_forums);

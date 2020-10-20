@@ -48,18 +48,18 @@ import retrofit2.Response;
 
 public class ForumViewModel extends AndroidViewModel {
 
-    private MutableLiveData<Boolean> privIsLogin = new MutableLiveData<>(false);
+    private final MutableLiveData<Boolean> privIsLogin = new MutableLiveData<>(false);
 
     //фильтрованный список топиков
-    private MediatorLiveData<PagedList<Topic>> filteredTopics=new MediatorLiveData<>();
+    private final MediatorLiveData<PagedList<Topic>> filteredTopics=new MediatorLiveData<>();
     private LiveData<PagedList<Topic>> topics;
 
     //фильтрованный список постов
-    private MediatorLiveData<PagedList<Post>> filteredPosts=new MediatorLiveData<>();
+    private final MediatorLiveData<PagedList<Post>> filteredPosts=new MediatorLiveData<>();
     private LiveData<PagedList<Post>> posts;
 
     //все сообщения
-    private MediatorLiveData<WorkInfo> messages=new MediatorLiveData<>();
+    private final MediatorLiveData<WorkInfo> messages=new MediatorLiveData<>();
 
     Observer<WorkInfo> observer = new Observer<WorkInfo>() {
         @Override
@@ -77,8 +77,8 @@ public class ForumViewModel extends AndroidViewModel {
         void onError(String message);
     }
 
-    private Application application;
-    private AppDataBase database;
+    private final Application application;
+    private final AppDataBase database;
 
     public ForumViewModel(@NonNull Application application) {
         super(application);

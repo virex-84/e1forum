@@ -78,6 +78,21 @@ public class BaseFragment extends Fragment implements LifecycleOwner {
     void restorePosition(RecyclerView.LayoutManager linearLayoutManager, String SHARED_OPTIONS) {
         SharedPreferences settings = mainactivity.getSharedPreferences(SHARED_OPTIONS, MODE_PRIVATE);
         String pos = settings.getString(SHARED_RECYCLER_POSITION, "");
+
+        /*
+        //{"mAnchorLayoutFromEnd":false,"mAnchorOffset":0,"mAnchorPosition":0}
+        if (pos!=null) {
+            JsonElement jelement = new JsonParser().parse(pos);
+            JsonObject jobject = jelement.getAsJsonObject();
+            int posx = jobject.get("mAnchorPosition").getAsInt();
+            int offset = jobject.get("mAnchorOffset").getAsInt();
+
+            //сначала переходим в приблизительную позицию (быстрое перемещение)
+            ((LinearLayoutManager)linearLayoutManager).scrollToPositionWithOffset(posx,offset);
+        }
+         */
+
+        //а потом точное позиционирование
         LinearLayoutManager.SavedState position =new Gson().fromJson(pos, LinearLayoutManager.SavedState.class);
         linearLayoutManager.onRestoreInstanceState(position);
     }

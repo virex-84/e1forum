@@ -256,6 +256,7 @@ public class PostFragment extends BaseFragment  implements SearchView.OnQueryTex
         linearLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
+        recyclerView.getItemAnimator().setChangeDuration(0);//!!! анимация "дёргания" при изменении убрана!!!
 
         footerAdapter = new FooterAdapter(new FooterAdapter.OnItemClickListener() {
             @Override
