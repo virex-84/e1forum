@@ -35,6 +35,7 @@ import androidx.work.Data;
 import androidx.work.WorkInfo;
 
 import com.virex.e1forum.common.Utils;
+import com.virex.e1forum.db.dao.PostView;
 import com.virex.e1forum.db.entity.Post;
 import com.virex.e1forum.db.entity.Topic;
 import com.virex.e1forum.db.entity.User;
@@ -118,7 +119,7 @@ public class PostFragment extends BaseFragment  implements SearchView.OnQueryTex
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.list_layout,container, false);
 
-        postAdapter = new PostAdapter(Post.DIFF_CALLBACK, new PostAdapter.PostListener() {
+        postAdapter = new PostAdapter(PostView.DIFF_CALLBACK, new PostAdapter.PostListener() {
             @Override
             public void onUserClick(final String userNick, final TextView widget) {
                 //observeOnce - подписываемся один раз на событие и сразу отписываемся
@@ -184,7 +185,7 @@ public class PostFragment extends BaseFragment  implements SearchView.OnQueryTex
             }
 
             @Override
-            public void onVoteClick(final Post post, VoteType voteType) {
+            public void onVoteClick(final PostView post, VoteType voteType) {
                 //сохраняем позицию перед плюсометом
                 savePosition(linearLayoutManager,SHARED_OPTIONS);
                 forumViewModel.votePost(post, voteType, new ForumViewModel.NetworkListener() {
@@ -201,17 +202,17 @@ public class PostFragment extends BaseFragment  implements SearchView.OnQueryTex
             }
 
             @Override
-            public void onReplyClick(Post post) {
+            public void onReplyClick(PostView post) {
                 sendPost(post,false);
             }
 
             @Override
-            public void onQuoteClick(Post post) {
+            public void onQuoteClick(PostView post) {
                 sendPost(post,true);
             }
 
             @Override
-            public void onModeratorClick(final Post post) {
+            public void onModeratorClick(final PostView post) {
                 AlertDialog.Builder dialog = new AlertDialog.Builder(maincontext);
                 dialog.setCancelable(true);
                 dialog.setMessage(getString(R.string.send_to_moderator));
@@ -332,9 +333,9 @@ public class PostFragment extends BaseFragment  implements SearchView.OnQueryTex
             }
         });
 
-        forumViewModel.getPosts(forum_id,topic_id,filter).observe(this.getViewLifecycleOwner(), new Observer<PagedList<Post>>() {
+        forumViewModel.getPosts(forum_id,topic_id,filter).observe(this.getViewLifecycleOwner(), new Observer<PagedList<PostView>>() {
             @Override
-            public void onChanged(PagedList<Post> posts) {
+            public void onChanged(PagedList<PostView> posts) {
                 if (posts.size()==0)
                     postAdapter.submitList(forumViewModel.emptyPostPagedList());
                 else {

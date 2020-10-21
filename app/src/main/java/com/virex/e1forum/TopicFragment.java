@@ -27,6 +27,7 @@ import androidx.work.Data;
 import androidx.work.WorkInfo;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.virex.e1forum.db.dao.TopicView;
 import com.virex.e1forum.db.entity.Topic;
 import com.virex.e1forum.ui.FooterAdapter;
 import com.virex.e1forum.ui.PostDialog;
@@ -93,9 +94,9 @@ public class TopicFragment extends BaseFragment implements SearchView.OnQueryTex
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.topics_layout,container, false);
 
-        topicAdapter = new TopicAdapter(Topic.DIFF_CALLBACK, new TopicAdapter.TopicListener() {
+        topicAdapter = new TopicAdapter(TopicView.DIFF_CALLBACK, new TopicAdapter.TopicListener() {
             @Override
-            public void onClick(Topic topic) {
+            public void onClick(TopicView topic) {
                 Bundle bundle = new Bundle();
                 bundle.putString(TopicFragment.TITLE,topic.title);
                 bundle.putInt(PostFragment.FORUM_ID,topic.forum_id);
@@ -104,7 +105,7 @@ public class TopicFragment extends BaseFragment implements SearchView.OnQueryTex
             }
 
             @Override
-            public void onBookMark(Topic topic) {
+            public void onBookMark(TopicView topic) {
                 savePosition(linearLayoutManager,SHARED_OPTIONS);
                 forumViewModel.checkTopicBookmark(topic);
             }
@@ -226,9 +227,9 @@ public class TopicFragment extends BaseFragment implements SearchView.OnQueryTex
             }
         });
 
-        forumViewModel.getTopics(forum_id,filter).observe(this.getViewLifecycleOwner(), new Observer<PagedList<Topic>>() {
+        forumViewModel.getTopics(forum_id,filter).observe(this.getViewLifecycleOwner(), new Observer<PagedList<TopicView>>() {
             @Override
-            public void onChanged(PagedList<Topic> topics) {
+            public void onChanged(PagedList<TopicView> topics) {
                 if (topics.size()==0)
                     topicAdapter.submitList(forumViewModel.emptyTopicPagedList());
                 else {

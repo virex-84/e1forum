@@ -1,6 +1,7 @@
 package com.virex.e1forum.repository;
 
 import android.content.Context;
+import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 import androidx.work.Data;
@@ -35,7 +36,7 @@ public class PostsWorker extends Worker {
 
     public static final String POSTS_MESSAGE = "POSTS_MESSAGE";
 
-    private AppDataBase database = AppDataBase.getAppDatabase(getApplicationContext());
+    private final AppDataBase database = AppDataBase.getAppDatabase(getApplicationContext());
 
     public PostsWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
@@ -87,15 +88,17 @@ public class PostsWorker extends Worker {
                             public void onParse(User user, SiteParser.ParseStatus parseStatus) {
                                 if (parseStatus!=SiteParser.ParseStatus.INPROCESS && user==null) return;
 
+                                //List<User> users=database.userDao().getUsers2(user.nick);
                                 User oldUser=database.userDao().getUser(user.nick);
                                 if (oldUser!=null){
                                     //обязательно сохраняем поля которые могут перезатереться если войти не залогиненным
-                                    if (user.actionMail==null) user.actionMail=oldUser.actionMail;
-                                    if (user.actionLK==null) user.actionLK=oldUser.actionLK;
-                                    if (user.avatarIMG==null) user.avatarIMG=oldUser.avatarIMG;
-                                    if (user.avatarURL==null) user.avatarURL=oldUser.avatarURL;
-                                    if (user.link==null) user.link=oldUser.link;
-                                }
+                                    if (TextUtils.isEmpty(oldUser.actionMail)) oldUser.actionMail=user.actionMail;
+                                    if (TextUtils.isEmpty(oldUser.actionLK)) oldUser.actionLK=user.actionLK;
+                                    if (oldUser.avatarIMG==null) oldUser.avatarIMG=user.avatarIMG;
+                                    if (TextUtils.isEmpty(oldUser.avatarURL)) oldUser.avatarURL=user.avatarURL;
+                                    if (TextUtils.isEmpty(oldUser.link)) oldUser.link=user.link;
+                                    database.userDao().update(oldUser);
+                                } else
                                 database.userDao().insert(user);
                             }
                         });

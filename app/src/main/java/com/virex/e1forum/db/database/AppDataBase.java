@@ -9,7 +9,9 @@ import androidx.room.TypeConverters;
 
 import com.virex.e1forum.db.dao.ForumDao;
 import com.virex.e1forum.db.dao.PostDao;
+import com.virex.e1forum.db.dao.PostView;
 import com.virex.e1forum.db.dao.TopicDao;
+import com.virex.e1forum.db.dao.TopicView;
 import com.virex.e1forum.db.dao.UserDao;
 import com.virex.e1forum.db.entity.Forum;
 import com.virex.e1forum.db.entity.Post;
@@ -19,7 +21,7 @@ import com.virex.e1forum.db.entity.User;
 /**
  * База данных Room
  */
-@Database(entities = {Forum.class, Topic.class, Post.class, User.class}, version = 1, exportSchema = false)
+@Database(entities = {Forum.class, Topic.class, Post.class, User.class}, views = {TopicView.class, PostView.class}, version = 1, exportSchema = false)
 @TypeConverters(RoomConverter.class)
 public abstract class AppDataBase extends RoomDatabase {
     private static AppDataBase instance;

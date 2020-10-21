@@ -1,5 +1,7 @@
 package com.virex.e1forum.ui;
 
+import android.content.Context;
+import android.graphics.Typeface;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -19,13 +21,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.virex.e1forum.R;
 import com.virex.e1forum.common.Utils;
-import com.virex.e1forum.db.entity.Post;
-import com.virex.e1forum.db.entity.Topic;
+import com.virex.e1forum.db.dao.TopicView;
 
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
-public class TopicAdapter extends PagedListAdapter<Topic, RecyclerView.ViewHolder> {
+public class TopicAdapter extends PagedListAdapter<TopicView, RecyclerView.ViewHolder> {
 
     private static final int ITEM = 1;
     private static final int EMPTY = 2;
@@ -37,18 +38,18 @@ public class TopicAdapter extends PagedListAdapter<Topic, RecyclerView.ViewHolde
     private int backgroundColor =-1;
 
     public interface TopicListener {
-        void onClick(Topic topic);
-        void onBookMark(Topic topic);
+        void onClick(TopicView topic);
+        void onBookMark(TopicView topic);
         void onCurrentListLoaded();
     }
 
-    public TopicAdapter(@NonNull DiffUtil.ItemCallback<Topic> diffCallback, TopicListener topicListener) {
+    public TopicAdapter(@NonNull DiffUtil.ItemCallback<TopicView> diffCallback, TopicListener topicListener) {
         super(diffCallback);
         this.topicListener=topicListener;
     }
 
     @Override
-    public void onCurrentListChanged(@Nullable PagedList<Topic> previousList, @Nullable PagedList<Topic> currentList) {
+    public void onCurrentListChanged(@Nullable PagedList<TopicView> previousList, @Nullable PagedList<TopicView> currentList) {
         super.onCurrentListChanged(previousList, currentList);
         if (topicListener!=null)
             topicListener.onCurrentListLoaded();
@@ -83,11 +84,11 @@ public class TopicAdapter extends PagedListAdapter<Topic, RecyclerView.ViewHolde
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        //Context context = holder.itemView.getContext();
+        Context context = holder.itemView.getContext();
 
         switch(getItemViewType(position)){
             case ITEM:
-                final Topic topic = getItem(position);
+                final TopicView topic = getItem(position);
                 TopicHolder topicHolder= ((TopicHolder)holder);
 
                 SpannableStringBuilder title=(SpannableStringBuilder)HtmlCompat.fromHtml(topic.title!=null ? topic.title : "?",HtmlCompat.FROM_HTML_MODE_COMPACT);
@@ -116,6 +117,24 @@ public class TopicAdapter extends PagedListAdapter<Topic, RecyclerView.ViewHolde
                     topicHolder.ib_bookmark.setImageResource(R.drawable.ic_bookmark);
                 else
                     topicHolder.ib_bookmark.setImageResource(R.drawable.ic_unbookmark);
+
+                //если тему открывали
+                if (topic.commentsloaded>0) {
+                    //если она не вся прочитана - то отображаем оранжевый значок
+                    if (topic.commentsloaded<(topic.comments-1))
+                        topicHolder.iv_isalreadyread.setBackgroundColor(context.getResources().getColor(R.color.colorAccent));
+                    else
+                        topicHolder.iv_isalreadyread.setBackgroundColor(context.getResources().getColor(R.color.white));
+
+                    //помечаем ранее открытую тему обычным шрифтом
+                    topicHolder.tv_title.setTypeface(null, Typeface.NORMAL);
+                } else {
+                    //не открытую тему выделяем
+                    topicHolder.tv_title.setTypeface(null, Typeface.BOLD);
+
+                    topicHolder.iv_isalreadyread.setBackgroundColor(context.getResources().getColor(R.color.white));
+                }
+
 
                 String text=new SimpleDateFormat("HH:mm dd.MM.yyyy", Locale.ENGLISH).format(topic.lastmod);
                 topicHolder.tv_date.setText(text);
@@ -160,6 +179,7 @@ public class TopicAdapter extends PagedListAdapter<Topic, RecyclerView.ViewHolde
         ImageButton ib_bookmark;
         TextView tv_date;
         View main;
+        View iv_isalreadyread;
 
         TopicHolder(@NonNull View itemView) {
             super(itemView);
@@ -170,6 +190,7 @@ public class TopicAdapter extends PagedListAdapter<Topic, RecyclerView.ViewHolde
             iv_closed = itemView.findViewById(R.id.iv_closed);
             ib_bookmark = itemView.findViewById(R.id.ib_bookmark);
             tv_date = itemView.findViewById(R.id.tv_date);
+            iv_isalreadyread= itemView.findViewById(R.id.iv_isalreadyread);
         }
     }
 

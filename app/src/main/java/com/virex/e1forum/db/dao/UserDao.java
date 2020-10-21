@@ -15,7 +15,7 @@ import java.util.List;
 @Dao
 public interface UserDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void insert(User... user);
+    void insert(User user);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insert(ArrayList<User> users);
@@ -27,7 +27,7 @@ public interface UserDao {
     LiveData<List<User>> dataSource();
 
     //@Query("SELECT * FROM user WHERE nick LIKE '%' || :nick || '%' COLLATE UNICODE")
-    @Query("SELECT * FROM user WHERE nick LIKE :nick")
+    @Query("SELECT * FROM user WHERE nick = :nick")
     //LiveData<User> getUser(String nick);
     User getUser(String nick);
 
@@ -45,4 +45,7 @@ public interface UserDao {
 
     @Query("SELECT * FROM user")
     LiveData<User> getUsers();
+
+    @Query("SELECT * FROM user WHERE nick LIKE :nick")
+    List<User> getUsers2(String nick);
 }

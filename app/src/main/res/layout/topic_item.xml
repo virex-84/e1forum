@@ -71,7 +71,6 @@
                 android:textColor="@color/colorPrimary"
                 android:textSize="18sp" />
 
-
         </LinearLayout>
 
         <LinearLayout
@@ -100,6 +99,13 @@
 
         </LinearLayout>
 
+        <View
+            android:id="@+id/iv_isalreadyread"
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:layout_gravity="right"
+            android:layout_margin="3dp"
+            android:background="@color/colorAccent" />
     </LinearLayout>
 
 </androidx.cardview.widget.CardView>

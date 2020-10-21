@@ -19,6 +19,8 @@ import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
 
+import com.virex.e1forum.db.dao.PostView;
+import com.virex.e1forum.db.dao.TopicView;
 import com.virex.e1forum.db.database.AppDataBase;
 import com.virex.e1forum.db.entity.Forum;
 import com.virex.e1forum.db.entity.Post;
@@ -51,12 +53,12 @@ public class ForumViewModel extends AndroidViewModel {
     private final MutableLiveData<Boolean> privIsLogin = new MutableLiveData<>(false);
 
     //фильтрованный список топиков
-    private final MediatorLiveData<PagedList<Topic>> filteredTopics=new MediatorLiveData<>();
-    private LiveData<PagedList<Topic>> topics;
+    private final MediatorLiveData<PagedList<TopicView>> filteredTopics=new MediatorLiveData<>();
+    private LiveData<PagedList<TopicView>> topics;
 
     //фильтрованный список постов
-    private final MediatorLiveData<PagedList<Post>> filteredPosts=new MediatorLiveData<>();
-    private LiveData<PagedList<Post>> posts;
+    private final MediatorLiveData<PagedList<PostView>> filteredPosts=new MediatorLiveData<>();
+    private LiveData<PagedList<PostView>> posts;
 
     //все сообщения
     private final MediatorLiveData<WorkInfo> messages=new MediatorLiveData<>();
@@ -138,9 +140,9 @@ public class ForumViewModel extends AndroidViewModel {
 
     }
      */
-    private LiveData<PagedList<Topic>> createFilteredTopic(final int forum_id, String filter){
+    private LiveData<PagedList<TopicView>> createFilteredTopic(final int forum_id, String filter){
         filter=filter.toLowerCase();
-        LiveData<PagedList<Topic>> pagedListLiveData;
+        LiveData<PagedList<TopicView>> pagedListLiveData;
 
         PagedList.Config config = new PagedList.Config.Builder()
                 .setEnablePlaceholders(true)
@@ -152,7 +154,7 @@ public class ForumViewModel extends AndroidViewModel {
             pagedListLiveData = new LivePagedListBuilder<>(database.topicDao().dataSourcePagedList(forum_id),config)
                     .setInitialLoadKey(1)
                     .setFetchExecutor(Executors.newSingleThreadExecutor())
-                    .setBoundaryCallback(new PagedList.BoundaryCallback<Topic>() {
+                    .setBoundaryCallback(new PagedList.BoundaryCallback<TopicView>() {
                         @Override
                         public void onZeroItemsLoaded() {
                             super.onZeroItemsLoaded();
@@ -176,15 +178,15 @@ public class ForumViewModel extends AndroidViewModel {
         filteredTopics.removeSource(topics);
         topics=createFilteredTopic(forum_id, filter);
 
-        filteredTopics.addSource(topics, new Observer<PagedList<Topic>>() {
+        filteredTopics.addSource(topics, new Observer<PagedList<TopicView>>() {
             @Override
-            public void onChanged(@Nullable PagedList<Topic> topics) {
+            public void onChanged(@Nullable PagedList<TopicView> topics) {
                 filteredTopics.setValue(topics);
             }
         });
     }
 
-    LiveData<PagedList<Topic>> getTopics(int forum_id, String filter) {
+    LiveData<PagedList<TopicView>> getTopics(int forum_id, String filter) {
         setFilteredTopics(forum_id, filter);
         return filteredTopics;
     }
@@ -208,19 +210,19 @@ public class ForumViewModel extends AndroidViewModel {
         return result;
     }
 
-    PagedList<Topic> emptyTopicPagedList(){
-        PositionalDataSource<Topic> dataSource = new PositionalDataSource<Topic>() {
+    PagedList<TopicView> emptyTopicPagedList(){
+        PositionalDataSource<TopicView> dataSource = new PositionalDataSource<TopicView>() {
 
             @Override
-            public void loadInitial(@NonNull LoadInitialParams params, @NonNull LoadInitialCallback<Topic> callback) {
-                ArrayList<Topic> list=new ArrayList<>();
+            public void loadInitial(@NonNull LoadInitialParams params, @NonNull LoadInitialCallback<TopicView> callback) {
+                ArrayList<TopicView> list=new ArrayList<>();
                 list.add(null);
                 callback.onResult(list, 0,1);
             }
 
             @Override
-            public void loadRange(@NonNull LoadRangeParams params, @NonNull LoadRangeCallback<Topic> callback) {
-                callback.onResult(new ArrayList<Topic>());
+            public void loadRange(@NonNull LoadRangeParams params, @NonNull LoadRangeCallback<TopicView> callback) {
+                callback.onResult(new ArrayList<TopicView>());
             }
         };
         PagedList.Config config = new PagedList.Config.Builder()
@@ -234,19 +236,19 @@ public class ForumViewModel extends AndroidViewModel {
                 .build();
     }
 
-    PagedList<Post> emptyPostPagedList(){
-        PositionalDataSource<Post> dataSource = new PositionalDataSource<Post>() {
+    PagedList<PostView> emptyPostPagedList(){
+        PositionalDataSource<PostView> dataSource = new PositionalDataSource<PostView>() {
 
             @Override
-            public void loadInitial(@NonNull LoadInitialParams params, @NonNull LoadInitialCallback<Post> callback) {
-                ArrayList<Post> list=new ArrayList<>();
+            public void loadInitial(@NonNull LoadInitialParams params, @NonNull LoadInitialCallback<PostView> callback) {
+                ArrayList<PostView> list=new ArrayList<>();
                 list.add(null);
                 callback.onResult(list, 0,1);
             }
 
             @Override
-            public void loadRange(@NonNull LoadRangeParams params, @NonNull LoadRangeCallback<Post> callback) {
-                callback.onResult(new ArrayList<Post>());
+            public void loadRange(@NonNull LoadRangeParams params, @NonNull LoadRangeCallback<PostView> callback) {
+                callback.onResult(new ArrayList<PostView>());
             }
         };
         PagedList.Config config = new PagedList.Config.Builder()
@@ -286,9 +288,9 @@ public class ForumViewModel extends AndroidViewModel {
         return  pagedListLiveData;
     }
      */
-    private LiveData<PagedList<Post>> createFilteredPost(final int forum_id, final int topic_id, String filter){
+    private LiveData<PagedList<PostView>> createFilteredPost(final int forum_id, final int topic_id, String filter){
         filter=filter.toLowerCase();
-        LiveData<PagedList<Post>> pagedListLiveData;
+        LiveData<PagedList<PostView>> pagedListLiveData;
 
         PagedList.Config config = new PagedList.Config.Builder()
                 .setEnablePlaceholders(true)
@@ -304,7 +306,7 @@ public class ForumViewModel extends AndroidViewModel {
             pagedListLiveData = new LivePagedListBuilder<>(database.postDao().dataSourcePagedList(forum_id,topic_id),config)
                     //pagedListLiveData = new LivePagedListBuilder<>(database.postDao().dataSourcePagedListRaw(query),config)
                     .setFetchExecutor(Executors.newSingleThreadExecutor())
-                    .setBoundaryCallback(new PagedList.BoundaryCallback<Post>() {
+                    .setBoundaryCallback(new PagedList.BoundaryCallback<PostView>() {
                         @Override
                         public void onZeroItemsLoaded() {
                             super.onZeroItemsLoaded();
@@ -328,15 +330,15 @@ public class ForumViewModel extends AndroidViewModel {
         filteredPosts.removeSource(posts);
         posts=createFilteredPost(forum_id, topic_id, filter);
 
-        filteredPosts.addSource(posts, new Observer<PagedList<Post>>() {
+        filteredPosts.addSource(posts, new Observer<PagedList<PostView>>() {
             @Override
-            public void onChanged(@Nullable PagedList<Post> posts) {
+            public void onChanged(@Nullable PagedList<PostView> posts) {
                 filteredPosts.setValue(posts);
             }
         });
     }
 
-    LiveData<PagedList<Post>> getPosts(int forum_id, int topic_id, String filter) {
+    LiveData<PagedList<PostView>> getPosts(int forum_id, int topic_id, String filter) {
         setFilteredPosts(forum_id, topic_id, filter);
         return filteredPosts;
     }

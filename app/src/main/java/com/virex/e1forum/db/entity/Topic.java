@@ -27,7 +27,7 @@ public class Topic {
     public String userName;
     public String userSearch;//для поиска lower
     public String lastComment;
-    public String comments;
+    public int comments;
     public boolean isClosed=false;
     public boolean isAttathed=false;
     public int pagesCount;//количество страниц <<<----------------------!!!!

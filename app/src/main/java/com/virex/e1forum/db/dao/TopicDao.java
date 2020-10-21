@@ -31,16 +31,26 @@ public interface TopicDao {
     LiveData<List<Topic>> dataSource(int forum_id);
 
     //отображаем сначала прикрепленные, потом добавленные в избранное а потом по дате
-    @Query("SELECT * FROM topic WHERE forum_id=:forum_id ORDER BY isAttathed desc, isBookMark desc, lastmod desc")
-    DataSource.Factory<Integer, Topic> dataSourcePagedList(int forum_id);
+    @Query("SELECT * "+
+            " FROM TopicView"+
+            " WHERE forum_id=:forum_id ORDER BY isAttathed desc, isBookMark desc, lastmod desc")
+    DataSource.Factory<Integer, TopicView> dataSourcePagedList(int forum_id);
 
-    @Query("SELECT * FROM topic WHERE forum_id=:forum_id AND ((titleSearch LIKE '%'||:filter||'%') OR (userSearch LIKE '%'||:filter||'%')) ORDER BY isAttathed desc, isBookMark desc, lastmod desc")
-    DataSource.Factory<Integer, Topic> dataSourcePagedList(int forum_id, String filter);
+    @Query("SELECT * "+
+            " FROM TopicView"+
+            " WHERE forum_id=:forum_id AND ((titleSearch LIKE '%'||:filter||'%') OR (userSearch LIKE '%'||:filter||'%')) ORDER BY isAttathed desc, isBookMark desc, lastmod desc")
+    DataSource.Factory<Integer, TopicView> dataSourcePagedList(int forum_id, String filter);
+
+    @Query("SELECT * "+
+            " FROM TopicView "+
+            " WHERE forum_id=:forum_id AND ((titleSearch LIKE '%'||:filter||'%') OR (userSearch LIKE '%'||:filter||'%')) ORDER BY isAttathed desc, isBookMark desc, lastmod desc")
+    DataSource.Factory<Integer, TopicView> dataSourcePagedList2(int forum_id, String filter);
+
 
     @Query("SELECT pagesCount FROM topic WHERE forum_id=:forum_id AND id=:topic_id")
     LiveData<Integer> getPagesCount(int forum_id, int topic_id);
 
-    @Query("SELECT * FROM topic WHERE forum_id=:forum_id AND id=:topic_id")
+    @Query("SELECT *,(SELECT COUNT(*) FROM post where forum_id=:forum_id and topic_id=topic.id) as commentsloaded  FROM topic WHERE forum_id=:forum_id AND id=:topic_id")
     LiveData<Topic> getTopicLive(int forum_id, int topic_id);
 
     @Query("SELECT * FROM topic WHERE forum_id=:forum_id AND id=:topic_id")

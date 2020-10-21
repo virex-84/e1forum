@@ -98,7 +98,10 @@ public class SiteParser {
 
                     topic.title=element.getElementsByClass("title-cont").text();
                     topic.titleSearch=topic.title.toLowerCase();
-                    topic.comments=element.getElementsByClass("comments-wrap").text();
+                    String comments=element.getElementsByClass("comments-wrap").text();
+                    try{
+                        topic.comments=Integer.parseInt(comments);
+                    }catch (Exception e){}
                     topic.userName=element.getElementsByClass("username-cont").html();
                     topic.userSearch=element.getElementsByClass("username-cont").text().toLowerCase();
                     topic.lastComment=element.getElementsByClass("comment-date").text();

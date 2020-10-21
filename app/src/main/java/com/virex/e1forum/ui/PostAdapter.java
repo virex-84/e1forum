@@ -35,7 +35,7 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.virex.e1forum.R;
 import com.virex.e1forum.common.GlideApp;
 import com.virex.e1forum.common.Utils;
-import com.virex.e1forum.db.entity.Post;
+import com.virex.e1forum.db.dao.PostView;
 import com.virex.e1forum.network.VoteType;
 
 import org.xml.sax.XMLReader;
@@ -44,7 +44,7 @@ import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
-public class PostAdapter extends PagedListAdapter<Post, RecyclerView.ViewHolder> {
+public class PostAdapter extends PagedListAdapter<PostView, RecyclerView.ViewHolder> {
 
 
     private boolean isReadOnly=false;
@@ -65,14 +65,14 @@ public class PostAdapter extends PagedListAdapter<Post, RecyclerView.ViewHolder>
         void onLinkClick(String link);
         void onUserClick(String userNick, TextView widget);
         void onImageClick(Drawable drawable, String filename,boolean isLongClick);
-        void onVoteClick(Post post, VoteType voteType);
-        void onReplyClick(Post post);
-        void onQuoteClick(Post post);
-        void onModeratorClick(Post post);
+        void onVoteClick(PostView post, VoteType voteType);
+        void onReplyClick(PostView post);
+        void onQuoteClick(PostView post);
+        void onModeratorClick(PostView post);
         void onCurrentListLoaded();
     }
 
-    public PostAdapter(@NonNull DiffUtil.ItemCallback<Post> diffCallback, PostListener postListener, Resources resources) {
+    public PostAdapter(@NonNull DiffUtil.ItemCallback<PostView> diffCallback, PostListener postListener, Resources resources) {
         super(diffCallback);
         this.postListener =postListener;
 
@@ -139,7 +139,7 @@ public class PostAdapter extends PagedListAdapter<Post, RecyclerView.ViewHolder>
     }
 
     @Override
-    public void onCurrentListChanged(@Nullable PagedList<Post> previousList, @Nullable PagedList<Post> currentList) {
+    public void onCurrentListChanged(@Nullable PagedList<PostView> previousList, @Nullable PagedList<PostView> currentList) {
         super.onCurrentListChanged(previousList, currentList);
         if(PostAdapter.this.postListener!=null)
             PostAdapter.this.postListener.onCurrentListLoaded();
@@ -188,7 +188,7 @@ public class PostAdapter extends PagedListAdapter<Post, RecyclerView.ViewHolder>
 
         switch(getItemViewType(position)){
             case ITEM:
-                final Post post = getItem(position);
+                final PostView post = getItem(position);
                 final PostHolder postHolder=((PostHolder)holder);
 
                 String userLink=String.format(Locale.ENGLISH,"<a href=\"%s\">%s</a>","user:".concat(post.user),post.user);
@@ -231,11 +231,13 @@ public class PostAdapter extends PagedListAdapter<Post, RecyclerView.ViewHolder>
                 postHolder.tv_carma_minus.setText(String.valueOf(post.carmaMinus));
 
                 //грузим аватар
-                if (post.userAvatarURL!=null && post.userAvatarURL.length()>0){
+                //if (post.userAvatarURL!=null && post.userAvatarURL.length()>0){
+                if (post.usr.avatarURL!=null && post.usr.avatarURL.length()>0){
                     try {
                         GlideApp
                                 .with(holder.itemView)
-                                .load(post.userAvatarURL)
+                                //.load(post.userAvatarURL)
+                                .load(post.usr.avatarURL)
                                 //.override(30, 30)
                                 .transform(new CircleCrop())
                                 .error(R.drawable.ic_closed)
