@@ -84,36 +84,28 @@
 
                 <Button
                     android:id="@+id/btn_reply"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:text="@null"
-                    android:layout_gravity="center"
-                    android:background="@drawable/ic_send"
-                    android:layout_margin="8sp"
-                    />
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/Post"
+                    android:layout_marginRight="4dp"/>
 
                 <Button
                     android:id="@+id/btn_quote"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="42sp"
+                    android:layout_height="42sp"
                     android:layout_gravity="center"
-                    android:background="@drawable/ic_quote"
-                    android:tint="@color/colorPrimary"
-                    android:layout_margin="8sp"
                     android:text="@null"
-                    />
+                    android:tint="@color/colorPrimary"
+                    android:background="@drawable/ic_quote" />
 
                 <Button
                     android:id="@+id/btn_moderator"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="42sp"
+                    android:layout_height="42sp"
                     android:layout_gravity="center"
                     android:background="@drawable/ic_moderator"
                     android:tint="@color/colorPrimary"
-                    android:layout_margin="8sp"
-                    android:text="@null"
-                    />
-
+                    android:text="@null" />
             </LinearLayout>
 
             <LinearLayout
@@ -139,7 +131,7 @@
                     android:minWidth="0dp"
                     android:minHeight="0dp"
                     android:text="+"
-                    android:textSize="12sp" />
+                    android:textSize="20sp" />
 
 
                 <TextView
@@ -150,14 +142,14 @@
                     android:text="0"
                     android:textColor="@color/colorGreen"
                     android:textStyle="bold"
-                    android:textSize="12sp" />
+                    android:textSize="20sp" />
 
                 <TextView
                     android:id="@+id/textView2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:textSize="12sp"
+                    android:textSize="20sp"
                     android:text="/" />
 
                 <TextView
@@ -168,7 +160,7 @@
                     android:text="0"
                     android:textColor="@color/colorRed"
                     android:textStyle="bold"
-                    android:textSize="12sp" />
+                    android:textSize="20sp" />
 
                 <Button
                     android:id="@+id/btn_minus"
@@ -177,7 +169,7 @@
                     android:minWidth="0dp"
                     android:minHeight="0dp"
                     android:text="-"
-                    android:textSize="12sp" />
+                    android:textSize="20sp" />
             </LinearLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>

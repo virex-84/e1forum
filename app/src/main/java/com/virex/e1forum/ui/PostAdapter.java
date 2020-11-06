@@ -31,6 +31,7 @@ import androidx.paging.PagedListAdapter;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.virex.e1forum.R;
 import com.virex.e1forum.common.GlideApp;
@@ -232,24 +233,26 @@ public class PostAdapter extends PagedListAdapter<PostView, RecyclerView.ViewHol
 
                 //грузим аватар
                 //if (post.userAvatarURL!=null && post.userAvatarURL.length()>0){
+
+                //по умолчанию - "пустой" аватар
+                postHolder.iv_avatar.setImageResource(R.drawable.ic_empty_image);
+                postHolder.iv_avatar.setAlpha(0.3f);
+
                 if (post.usr.avatarURL!=null && post.usr.avatarURL.length()>0){
                     try {
                         GlideApp
                                 .with(holder.itemView)
                                 //.load(post.userAvatarURL)
                                 .load(post.usr.avatarURL)
+                                .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
                                 //.override(30, 30)
                                 .transform(new CircleCrop())
-                                .error(R.drawable.ic_closed)
+                                .error(R.drawable.ic_error_image)
                                 .into(postHolder.iv_avatar);
                         postHolder.iv_avatar.setAlpha(1f);
                     }catch(Exception e){
                         e.printStackTrace();
                     }
-                } else {
-                    //нет аватара
-                    postHolder.iv_avatar.setImageResource(R.drawable.ic_empty_image);
-                    postHolder.iv_avatar.setAlpha(0.3f);
                 }
 
                 //пост для чтения - запрет на ответ и цитирование
@@ -338,8 +341,8 @@ public class PostAdapter extends PagedListAdapter<PostView, RecyclerView.ViewHol
         TextView tv_user;
         TextView tv_text;
         Button btn_reply;
-        ImageButton btn_quote;
-        ImageButton btn_moderator;
+        Button btn_quote;
+        Button btn_moderator;
         TextView tv_carma_plus;
         TextView tv_carma_minus;
         Button btn_plus;
