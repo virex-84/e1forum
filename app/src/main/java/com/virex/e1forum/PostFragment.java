@@ -436,6 +436,9 @@ public class PostFragment extends BaseFragment  implements SearchView.OnQueryTex
     }
 
     private void aboutUser(final int user_id){
+        //сохраняем позицию т.к. метод сохраняет данные о пользователе и это приводит к перезагрузке списка постов
+        savePosition(linearLayoutManager,SHARED_OPTIONS);
+
         forumViewModel.aboutUser(user_id, new ForumViewModel.NetworkListener() {
             @Override
             public void onSuccess(String message) {

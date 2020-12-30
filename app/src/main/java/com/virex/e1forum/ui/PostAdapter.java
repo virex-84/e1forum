@@ -10,8 +10,11 @@ import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
+import android.text.style.BackgroundColorSpan;
+import android.text.style.ForegroundColorSpan;
 import android.text.style.ImageSpan;
 import android.text.style.QuoteSpan;
+import android.text.style.StrikethroughSpan;
 import android.text.style.URLSpan;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -197,6 +200,13 @@ public class PostAdapter extends PagedListAdapter<PostView, RecyclerView.ViewHol
                 SpannableStringBuilder text=(SpannableStringBuilder)HtmlCompat.fromHtml(post.text, HtmlCompat.FROM_HTML_MODE_LEGACY,new GlideImageGetter(resources,postHolder.tv_text), new Html.TagHandler() {
                     @Override
                     public void handleTag(boolean opening, String tag, Editable editable, XMLReader xmlReader) {
+
+                        //добавляем цвет для "от пользователя xxx"
+                        if (tag.equalsIgnoreCase("reply-cont")) {
+                            if (!opening)
+                                editable.setSpan(new ForegroundColorSpan(spanColor), 0, editable.length(), 0);
+                        }
+
                         if (opening) {
                             //добавим надпись перед цитатой
                             if (tag.equalsIgnoreCase("blockquote")) {
@@ -228,15 +238,18 @@ public class PostAdapter extends PagedListAdapter<PostView, RecyclerView.ViewHol
                 postHolder.tv_text.setText(text);
 
                 postHolder.tv_date.setText(getDate(post.lastmod));
-                postHolder.tv_carma_plus.setText(String.valueOf(post.carmaPlus));
-                postHolder.tv_carma_minus.setText(String.valueOf(post.carmaMinus));
+                //postHolder.tv_carma_plus.setText(String.valueOf(post.carmaPlus));
+                //postHolder.tv_carma_minus.setText(String.valueOf(post.carmaMinus));
+
+                postHolder.btn_plus.setText("+".concat(String.valueOf(post.carmaPlus)));
+                postHolder.btn_minus.setText("-".concat(String.valueOf(post.carmaMinus)));
 
                 //грузим аватар
                 //if (post.userAvatarURL!=null && post.userAvatarURL.length()>0){
 
                 //по умолчанию - "пустой" аватар
                 postHolder.iv_avatar.setImageResource(R.drawable.ic_empty_image);
-                postHolder.iv_avatar.setAlpha(0.3f);
+                //postHolder.iv_avatar.setAlpha(0.3f);
 
                 if (post.usr.avatarURL!=null && post.usr.avatarURL.length()>0){
                     try {
@@ -244,12 +257,13 @@ public class PostAdapter extends PagedListAdapter<PostView, RecyclerView.ViewHol
                                 .with(holder.itemView)
                                 //.load(post.userAvatarURL)
                                 .load(post.usr.avatarURL)
+                                .placeholder(R.drawable.ic_empty_image)
                                 .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
                                 //.override(30, 30)
                                 .transform(new CircleCrop())
                                 .error(R.drawable.ic_error_image)
                                 .into(postHolder.iv_avatar);
-                        postHolder.iv_avatar.setAlpha(1f);
+                        //postHolder.iv_avatar.setAlpha(1f);
                     }catch(Exception e){
                         e.printStackTrace();
                     }
@@ -264,8 +278,6 @@ public class PostAdapter extends PagedListAdapter<PostView, RecyclerView.ViewHol
                     postHolder.btn_reply.setEnabled(true);
                     postHolder.btn_quote.setEnabled(true);
                     postHolder.btn_moderator.setEnabled(true);
-                    postHolder.btn_plus.setEnabled(true);
-                    postHolder.btn_minus.setEnabled(true);
 
                     postHolder.btn_reply.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -294,7 +306,8 @@ public class PostAdapter extends PagedListAdapter<PostView, RecyclerView.ViewHol
                 postHolder.tv_text.setMovementMethod(this.linkMovementMethod);
                 postHolder.tv_user.setMovementMethod(this.linkMovementMethod);
 
-                if (post.disableCarma){
+                //плюсомет
+                if (isReadOnly || post.disableCarma){
                     postHolder.btn_plus.setEnabled(false);
                     postHolder.btn_minus.setEnabled(false);
                 } else {
@@ -343,8 +356,8 @@ public class PostAdapter extends PagedListAdapter<PostView, RecyclerView.ViewHol
         Button btn_reply;
         Button btn_quote;
         Button btn_moderator;
-        TextView tv_carma_plus;
-        TextView tv_carma_minus;
+        //TextView tv_carma_plus;
+        //TextView tv_carma_minus;
         Button btn_plus;
         Button btn_minus;
         ImageView iv_avatar;
@@ -364,8 +377,8 @@ public class PostAdapter extends PagedListAdapter<PostView, RecyclerView.ViewHol
             btn_reply = itemView.findViewById(R.id.btn_reply);
             btn_quote = itemView.findViewById(R.id.btn_quote);
             btn_moderator = itemView.findViewById(R.id.btn_moderator);
-            tv_carma_plus = itemView.findViewById(R.id.tv_carma_plus);
-            tv_carma_minus = itemView.findViewById(R.id.tv_carma_minus);
+            //tv_carma_plus = itemView.findViewById(R.id.tv_carma_plus);
+            //tv_carma_minus = itemView.findViewById(R.id.tv_carma_minus);
             btn_plus = itemView.findViewById(R.id.btn_plus);
             btn_minus = itemView.findViewById(R.id.btn_minus);
             iv_avatar = itemView.findViewById(R.id.iv_avatar);

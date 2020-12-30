@@ -257,7 +257,8 @@ public class SiteParser {
                         el.getElementsByClass("reply-cont").tagName("p");
                         if (el.getElementsByClass("reply-cont").size()>0)
                             el.getElementsByClass("reply-cont").first().appendElement("br");
-                        el.getElementsByClass("reply-cont").tagName("font").attr("color","#ff0000");
+                        //el.getElementsByClass("reply-cont").tagName("font").attr("color","#ff0000");
+                        el.getElementsByClass("reply-cont").tagName("reply-cont");
 
                         el.getElementsByClass("itemGO-block").remove();
                     }

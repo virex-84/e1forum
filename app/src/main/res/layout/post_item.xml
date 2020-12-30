@@ -29,7 +29,6 @@
                     android:layout_width="50sp"
                     android:layout_height="50sp"
                     android:src="@drawable/ic_empty_image"
-                    android:alpha="0.3"
                     android:layout_marginRight="6sp"
                     android:layout_marginEnd="6sp" />
 
@@ -139,18 +138,10 @@
                     android:minWidth="0dp"
                     android:minHeight="0dp"
                     android:text="+"
-                    android:textSize="12sp" />
+                    android:textSize="12sp"
+                    android:textColor="@color/colorGreenDark"
+                    />
 
-
-                <TextView
-                    android:id="@+id/tv_carma_plus"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:padding="10sp"
-                    android:text="0"
-                    android:textColor="@color/colorGreen"
-                    android:textStyle="bold"
-                    android:textSize="12sp" />
 
                 <TextView
                     android:id="@+id/textView2"
@@ -160,16 +151,6 @@
                     android:textSize="12sp"
                     android:text="/" />
 
-                <TextView
-                    android:id="@+id/tv_carma_minus"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:padding="10sp"
-                    android:text="0"
-                    android:textColor="@color/colorRed"
-                    android:textStyle="bold"
-                    android:textSize="12sp" />
-
                 <Button
                     android:id="@+id/btn_minus"
                     android:layout_width="wrap_content"
@@ -177,7 +158,9 @@
                     android:minWidth="0dp"
                     android:minHeight="0dp"
                     android:text="-"
-                    android:textSize="12sp" />
+                    android:textSize="12sp"
+                    android:textColor="@color/colorRed"
+                    />
             </LinearLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>

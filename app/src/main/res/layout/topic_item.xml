@@ -105,7 +105,9 @@
             android:layout_height="8dp"
             android:layout_gravity="right"
             android:layout_margin="3dp"
-            android:background="@color/colorAccent" />
+            android:background="@color/colorAccent"
+            android:tint="@color/colorPrimary"
+            />
     </LinearLayout>
 
 </androidx.cardview.widget.CardView>

@@ -1,6 +1,7 @@
 package com.virex.e1forum.common;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Environment;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -10,6 +11,7 @@ import android.text.style.ForegroundColorSpan;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
@@ -21,6 +23,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Utils {
+    public static String pref_dark_theme="pref_dark_theme";
+
     /**
      * Observes the given {@link LiveData} until the first change.
      * If the LiveData's value is available, the {@link Observer} will be
@@ -90,6 +94,24 @@ public class Utils {
             e.printStackTrace();
 
         }
+    }
+
+    //смена темы "дневная/ночная"
+    public static void changeTheme(SharedPreferences sharedPreferences){
+        boolean is_dark_theme=!sharedPreferences.getBoolean(pref_dark_theme,false);
+        sharedPreferences.edit().putBoolean(pref_dark_theme,is_dark_theme).apply();
+    }
+
+    public static void setDarkTheme(boolean is_dark_theme){
+        if (is_dark_theme){
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        }
+    }
+
+    public static boolean isDarkTheme(SharedPreferences sharedPreferences){
+        return sharedPreferences.getBoolean(pref_dark_theme,false);
     }
 
 }

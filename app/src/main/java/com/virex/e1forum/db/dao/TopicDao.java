@@ -50,7 +50,7 @@ public interface TopicDao {
     @Query("SELECT pagesCount FROM topic WHERE forum_id=:forum_id AND id=:topic_id")
     LiveData<Integer> getPagesCount(int forum_id, int topic_id);
 
-    @Query("SELECT *,(SELECT COUNT(*) FROM post where forum_id=:forum_id and topic_id=topic.id) as commentsloaded  FROM topic WHERE forum_id=:forum_id AND id=:topic_id")
+    @Query("SELECT *  FROM topic WHERE forum_id=:forum_id AND id=:topic_id")
     LiveData<Topic> getTopicLive(int forum_id, int topic_id);
 
     @Query("SELECT * FROM topic WHERE forum_id=:forum_id AND id=:topic_id")

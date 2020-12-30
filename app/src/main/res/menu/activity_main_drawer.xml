@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:showIn="navigation_view">
 
     <group android:checkableBehavior="single">
@@ -18,7 +19,12 @@
             android:title="@string/Logout" />
     </group>
 
-
+    <item
+        android:id="@+id/nav_dark_mode"
+        android:title="@string/Dark_mode"
+        android:icon="@drawable/ic_dark_mode"
+        app:actionLayout="@layout/layout_switch"
+        />
 
     <item android:title="Communicate">
         <menu>

@@ -6,6 +6,7 @@ import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
+import androidx.room.Transaction;
 import androidx.room.Update;
 
 import com.virex.e1forum.db.entity.Post;
@@ -35,6 +36,7 @@ public interface PostDao {
     //@Query("SELECT * FROM post WHERE forum_id=:forum_id AND topic_id=:topic_id ORDER BY lastmod asc")
     //DataSource.Factory<Integer, Post> dataSourcePagedList(int forum_id, int topic_id);
 
+    @Transaction
     @Query("SELECT * FROM PostView WHERE forum_id=:forum_id AND topic_id=:topic_id ORDER BY lastmod asc")
     DataSource.Factory<Integer, PostView> dataSourcePagedList(int forum_id, int topic_id);
 
@@ -45,6 +47,7 @@ public interface PostDao {
     //userSearch,textSearch и filter должны быть LOWER
     //@Query("SELECT * FROM post WHERE (forum_id=:forum_id AND topic_id=:topic_id) AND ((userSearch LIKE '%'||:filter||'%') OR (textSearch LIKE '%'||:filter||'%')) ORDER BY lastmod asc")
     //DataSource.Factory<Integer, Post> dataSourcePagedList(int forum_id, int topic_id, String filter);
+    @Transaction
     @Query("SELECT * FROM PostView WHERE (forum_id=:forum_id AND topic_id=:topic_id) AND ((userSearch LIKE '%'||:filter||'%') OR (textSearch LIKE '%'||:filter||'%')) ORDER BY lastmod asc")
     DataSource.Factory<Integer, PostView> dataSourcePagedList(int forum_id, int topic_id, String filter);
 

@@ -2,11 +2,14 @@ package com.virex.e1forum;
 
 import android.app.Application;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.virex.e1forum.common.PrefCookieJar;
+import com.virex.e1forum.common.Utils;
 import com.virex.e1forum.network.ForumWebService;
 import com.virex.e1forum.network.PostWebService;
 import com.virex.e1forum.network.TopicWebService;
@@ -30,7 +33,7 @@ import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class App extends Application {
+public class App extends Application implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     private PrefCookieJar prefCookieJar;
 
@@ -38,6 +41,7 @@ public class App extends Application {
     private static TopicWebService topicApi;
     private static PostWebService postApi;
     //private static AnketaWebService anketaApi;
+
 
     public static ForumWebService getForumApi() {
         return forumApi;
@@ -64,6 +68,12 @@ public class App extends Application {
                 }
             }
         });
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
+
+        boolean is_dark_theme = sharedPreferences.getBoolean(Utils.pref_dark_theme, false);
+        Utils.setDarkTheme(is_dark_theme);
         
         
         //устанавливаем контроль за куками
@@ -241,5 +251,14 @@ public class App extends Application {
 
         android.os.Process.killProcess(android.os.Process.myPid());
         System.exit(10);
+    }
+
+    //реагируем на изменение настроек
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (key.equals(Utils.pref_dark_theme)) {
+            boolean is_dark_theme = sharedPreferences.getBoolean(key, false);
+            Utils.setDarkTheme(is_dark_theme);
+        }
     }
 }

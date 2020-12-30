@@ -11,6 +11,8 @@
         <item name="colorSecondary">@color/colorPrimary</item>
         <!-- Customize colorSecondary to change icon/text of FAB (maps to tint and rippleColor) -->
         <item name="colorOnSecondary">@android:color/white</item>
+
+        <item name="switchStyle">@style/SwitchStyle</item>
     </style>
 
     <style name="ItemCardViewStyle" parent="Theme.AppCompat.Light">
@@ -32,6 +34,11 @@
 
     <style name="AppTheme.Launcher" parent="AppTheme.NoActionBar">
         <item name="android:windowBackground">@drawable/splashscreen</item>
+    </style>
+
+    <style name="SwitchStyle" parent="Widget.AppCompat.CompoundButton.Switch">
+        <item name="colorControlActivated">@color/colorPrimary</item>
+        <!--<item name="colorSwitchThumbNormal">@color/colorPrimary</item>-->
     </style>
 
 

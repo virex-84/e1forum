@@ -47,4 +47,5 @@
     <string name="insert_url">Введите URL адрес</string>
 
     <string name="app_crash_title">Упс… Программа завершилась с ошибкой…</string>
+    <string name="Dark_mode">Ночной режим</string>
 </resources>

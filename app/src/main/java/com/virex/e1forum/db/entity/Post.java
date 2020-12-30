@@ -53,7 +53,7 @@ public class Post {
     public int carmaPlus;
     public int carmaMinus;
 
-    public boolean disableCarma=false; //доступность "плюсомёта"
+    public boolean disableCarma; //доступность "плюсомёта"
 
     public long lastmod;  //последняя модификация timestamp
 

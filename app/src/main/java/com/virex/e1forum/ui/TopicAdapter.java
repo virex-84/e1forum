@@ -118,21 +118,18 @@ public class TopicAdapter extends PagedListAdapter<TopicView, RecyclerView.ViewH
                 else
                     topicHolder.ib_bookmark.setImageResource(R.drawable.ic_unbookmark);
 
+                topicHolder.iv_isalreadyread.setVisibility(View.GONE);
                 //если тему открывали
                 if (topic.commentsloaded>0) {
                     //если она не вся прочитана - то отображаем оранжевый значок
                     if (topic.commentsloaded<(topic.comments-1))
-                        topicHolder.iv_isalreadyread.setBackgroundColor(context.getResources().getColor(R.color.colorAccent));
-                    else
-                        topicHolder.iv_isalreadyread.setBackgroundColor(context.getResources().getColor(R.color.white));
+                        topicHolder.iv_isalreadyread.setVisibility(View.VISIBLE);
 
                     //помечаем ранее открытую тему обычным шрифтом
                     topicHolder.tv_title.setTypeface(null, Typeface.NORMAL);
                 } else {
                     //не открытую тему выделяем
                     topicHolder.tv_title.setTypeface(null, Typeface.BOLD);
-
-                    topicHolder.iv_isalreadyread.setBackgroundColor(context.getResources().getColor(R.color.white));
                 }
 
 

@@ -3,6 +3,7 @@ package com.virex.e1forum;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -69,6 +70,7 @@ public class BaseFragment extends Fragment implements LifecycleOwner {
     void savePosition(RecyclerView.LayoutManager linearLayoutManager, String SHARED_OPTIONS) {
         super.onPause();
         String pos=new Gson().toJson(linearLayoutManager.onSaveInstanceState());
+        Log.e("ttt_SAVE",pos);
         SharedPreferences settings = mainactivity.getSharedPreferences(SHARED_OPTIONS, MODE_PRIVATE);
         SharedPreferences.Editor editor = settings.edit();
         editor.putString(SHARED_RECYCLER_POSITION, pos);
@@ -92,6 +94,7 @@ public class BaseFragment extends Fragment implements LifecycleOwner {
         }
          */
 
+        Log.e("ttt_LOAD",pos);
         //а потом точное позиционирование
         LinearLayoutManager.SavedState position =new Gson().fromJson(pos, LinearLayoutManager.SavedState.class);
         linearLayoutManager.onRestoreInstanceState(position);

@@ -6,18 +6,23 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.view.GravityCompat;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 
 import android.preference.PreferenceManager;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.CompoundButton;
 import android.widget.Toast;
 
 import com.google.android.material.navigation.NavigationView;
+import com.virex.e1forum.common.Utils;
 import com.virex.e1forum.ui.BadgeDrawerArrowDrawable;
 import com.virex.e1forum.ui.LoginDialog;
 
+import androidx.core.view.MenuItemCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -34,6 +39,8 @@ public class MainActivity extends AppCompatActivity
 
     SharedPreferences options;
     NavigationView navigationView;
+    SwitchCompat switcher;
+
     private boolean isDrawerFixed=false;
     private BadgeDrawerArrowDrawable badgeDrawerArrowDrawable;
 
@@ -45,6 +52,8 @@ public class MainActivity extends AppCompatActivity
         setTheme(R.style.AppTheme_NoActionBar);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        options= PreferenceManager.getDefaultSharedPreferences(this);
 
         forumViewModel = getDefaultViewModelProviderFactory().create(ForumViewModel.class);
 
@@ -64,9 +73,24 @@ public class MainActivity extends AppCompatActivity
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
+        //---ночная тема
         navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        Menu menu = navigationView.getMenu();
+        MenuItem menuItem = menu.findItem(R.id.nav_dark_mode);
+        View actionView = MenuItemCompat.getActionView(menuItem);
+
+        switcher = actionView.findViewById(R.id.drawer_switch);
+        boolean is_dark_theme= Utils.isDarkTheme(options);
+        switcher.setChecked(is_dark_theme);
+        switcher.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                Utils.changeTheme(options);
+            }
+        });
+        //---
 
         //восстанавливаем ранее открытый фрагмент
         if (savedInstanceState != null) {
